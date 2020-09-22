@@ -57,7 +57,7 @@ public class PlanJsonParser {
 			}
 
 			printTab(tabCount, pw);
-			pw.print("Stage " + tempNode.getId() + " : " + tempNode.getPact() + "\n");
+			pw.print("Stage " + tempNode.getId() + " : " + tempNode.getPact() + "[location=temp_addr]\n");
 
 			printTab(tabCount + 1, pw);
 			String content = tempNode.getContents();

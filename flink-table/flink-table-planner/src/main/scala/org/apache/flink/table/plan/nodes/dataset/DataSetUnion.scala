@@ -41,9 +41,13 @@ class DataSetUnion(
     cluster: RelOptCluster,
     traitSet: RelTraitSet,
     inputs: JList[RelNode],
-    rowRelDataType: RelDataType)
+    rowRelDataType: RelDataType,
+    address: String)
   extends Union(cluster, traitSet, inputs, true)
   with DataSetRel {
+
+  var testddress = "address"
+  def getAddress() : String ={ return testddress}
 
   override def deriveRowType() = rowRelDataType
 
@@ -57,7 +61,8 @@ class DataSetUnion(
       cluster,
       traitSet,
       inputs,
-      rowRelDataType)
+      rowRelDataType,
+    "testAddress")
   }
 
   override def toString: String = {
@@ -66,6 +71,7 @@ class DataSetUnion(
 
   override def explainTerms(pw: RelWriter): RelWriter = {
     super.explainTerms(pw).item("union", unionSelectionToString)
+      .item("address", "testAddress")
   }
 
   override def computeSelfCost (planner: RelOptPlanner, metadata: RelMetadataQuery): RelOptCost = {

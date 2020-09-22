@@ -42,7 +42,8 @@ class DataSetScanRule
       scan.catalog,
       scan.dataSet,
       scan.fieldIdxs,
-      scan.schema
+      scan.schema,
+      "testAddress"
     )
   }
 }

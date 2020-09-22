@@ -42,6 +42,8 @@ import org.apache.flink.table.sinks._
 import org.apache.flink.table.sqlexec.SqlToOperationConverter
 import org.apache.flink.table.types.utils.TypeConversions
 import org.apache.flink.table.util.JavaScalaConversionUtil
+import org.apache.flink.annotation.Internal
+
 
 import org.apache.calcite.jdbc.CalciteSchema
 import org.apache.calcite.jdbc.CalciteSchemaBuilder.asRootSchema
@@ -210,6 +212,7 @@ class StreamPlanner(
     val sqlPlan = PlanJsonParser.getSqlExecutionPlan(jsonSqlPlan, false)
 
     s"== Abstract Syntax Tree ==" +
+      s"== This is a stream planner test ==" +
       System.lineSeparator +
       s"${RelOptUtil.toString(ast)}" +
       System.lineSeparator +

@@ -103,7 +103,7 @@ class BatchPlanner(
       sb.append(System.lineSeparator)
     }
 
-    sb.append("== Optimized Logical Plan ==")
+    sb.append("== batch Test Optimized Logical Plan ==")
     sb.append(System.lineSeparator)
     val explainLevel = if (extended) {
       SqlExplainLevel.ALL_ATTRIBUTES

@@ -208,6 +208,7 @@ abstract class BatchTableEnvImpl(
     val sqlPlan = PlanJsonParser.getSqlExecutionPlan(jasonSqlPlan, extended)
 
     s"== Abstract Syntax Tree ==" +
+      s"== This is a batchtable test ==" +
         System.lineSeparator +
         s"${RelOptUtil.toString(ast)}" +
         System.lineSeparator +

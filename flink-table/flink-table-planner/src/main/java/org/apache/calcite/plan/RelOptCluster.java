@@ -199,6 +199,7 @@ public class RelOptCluster {
 	public RelTraitSet traitSetOf(RelTrait trait) {
 		return emptyTraitSet.replace(trait);
 	}
+
 }
 
 // End RelOptCluster.java

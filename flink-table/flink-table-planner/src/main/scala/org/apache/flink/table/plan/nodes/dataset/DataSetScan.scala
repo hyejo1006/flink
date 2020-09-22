@@ -48,7 +48,8 @@ class DataSetScan(
     catalog: RelOptSchema,
     inputDataSet: DataSet[_],
     fieldIdxs: Array[Int],
-    rowRelDataType: RelDataType)
+    rowRelDataType: RelDataType,
+    address: String)
   extends TableScan(
     cluster,
     traitSet,
@@ -71,7 +72,8 @@ class DataSetScan(
       catalog,
       inputDataSet,
       fieldIdxs,
-      getRowType
+      getRowType,
+      "testAddress"
     )
   }
 
@@ -86,4 +88,5 @@ class DataSetScan(
   override def explainTerms(pw: RelWriter): RelWriter = pw
     .item("ref", System.identityHashCode(inputDataSet))
     .item("fields", String.join(", ", rowRelDataType.getFieldNames))
+    .item("address", "testAddress")
 }

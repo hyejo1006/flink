@@ -59,7 +59,8 @@ class DataSetUnionRule
       rel.getCluster,
       traitSet,
       newInputs,
-      rel.getRowType)
+      rel.getRowType,
+      "address")
   }
 }
 
