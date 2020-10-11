@@ -136,6 +136,7 @@ class BatchTableSourceScan(
       inputDataSet,
       fieldIndexes,
       config,
-      rowtimeExpression)
+      rowtimeExpression,
+    "testaddress")
   }
 }

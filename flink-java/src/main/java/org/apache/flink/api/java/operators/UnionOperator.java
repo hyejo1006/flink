@@ -33,6 +33,7 @@ import org.apache.flink.api.java.DataSet;
 public class UnionOperator<T> extends TwoInputOperator<T, T, T, UnionOperator<T>> {
 
 	private final String unionLocationName;
+	protected String location="uniontest";
 
 	/**
 	 * Create an operator that produces the union of the two given data sets.
@@ -40,12 +41,24 @@ public class UnionOperator<T> extends TwoInputOperator<T, T, T, UnionOperator<T>
 	 * @param input1 The first data set to be unioned.
 	 * @param input2 The second data set to be unioned.
 	 */
+	public UnionOperator(DataSet<T> input1, DataSet<T> input2, String unionLocationName, String location) {
+		super(input1, input2, input1.getType(), location);
+
+		if (!input1.getType().equals(input2.getType())) {
+			throw new InvalidProgramException("Cannot union inputs of different types. Input1="
+					+ input1.getType() + ", input2=" + input2.getType());
+		}
+
+		this.unionLocationName = unionLocationName;
+		this.location=location;
+	}
+
 	public UnionOperator(DataSet<T> input1, DataSet<T> input2, String unionLocationName) {
 		super(input1, input2, input1.getType());
 
 		if (!input1.getType().equals(input2.getType())) {
 			throw new InvalidProgramException("Cannot union inputs of different types. Input1="
-					+ input1.getType() + ", input2=" + input2.getType());
+				+ input1.getType() + ", input2=" + input2.getType());
 		}
 
 		this.unionLocationName = unionLocationName;
@@ -60,7 +73,7 @@ public class UnionOperator<T> extends TwoInputOperator<T, T, T, UnionOperator<T>
 	 */
 	@Override
 	protected Union<T> translateToDataFlow(Operator<T> input1, Operator<T> input2) {
-		return new Union<T>(input1, input2, unionLocationName);
+		return new Union<T>(input1, input2, unionLocationName, location);
 	}
 
 	@Override

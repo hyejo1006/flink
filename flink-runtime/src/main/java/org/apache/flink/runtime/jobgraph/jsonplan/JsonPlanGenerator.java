@@ -80,6 +80,7 @@ public class JsonPlanGenerator {
 				gen.writeStringField("operator", operator);
 				gen.writeStringField("operator_strategy", operatorDescr);
 				gen.writeStringField("description", description);
+				gen.writeStringField("location", vertex.getLocation());
 				
 				if (!vertex.isInputVertex()) {
 					// write the input edge properties

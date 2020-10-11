@@ -77,6 +77,8 @@ public abstract class TwoInputNode extends OptimizerNode {
 	
 	private List<OperatorDescriptorDual> cachedDescriptors;
 	
+	protected String location="twoinputnode";
+	
 	// --------------------------------------------------------------------------------------------
 	
 	/**
@@ -86,6 +88,8 @@ public abstract class TwoInputNode extends OptimizerNode {
 	 */
 	public TwoInputNode(DualInputOperator<?, ?, ?, ?> operator) {
 		super(operator);
+
+		this.location = super.getLocation();
 
 		int[] k1 = operator.getKeyColumns(0);
 		int[] k2 = operator.getKeyColumns(1);
@@ -107,6 +111,8 @@ public abstract class TwoInputNode extends OptimizerNode {
 	}
 
 	// ------------------------------------------------------------------------
+
+	public String getLocation(){return super.getLocation();}
 
 	@Override
 	public DualInputOperator<?, ?, ?, ?> getOperator() {

@@ -39,6 +39,7 @@ public class FlatMapOperator<IN, OUT> extends SingleInputUdfOperator<IN, OUT, Fl
 	protected final FlatMapFunction<IN, OUT> function;
 
 	protected final String defaultName;
+	protected String location = "flatmap";
 
 	public FlatMapOperator(DataSet<IN> input, TypeInformation<OUT> resultType, FlatMapFunction<IN, OUT> function, String defaultName) {
 		super(input, resultType);
@@ -46,6 +47,15 @@ public class FlatMapOperator<IN, OUT> extends SingleInputUdfOperator<IN, OUT, Fl
 		this.function = function;
 		this.defaultName = defaultName;
 	}
+	public FlatMapOperator(DataSet<IN> input, TypeInformation<OUT> resultType, FlatMapFunction<IN, OUT> function, String defaultName, String location) {
+		super(input, resultType, location);
+
+		this.function = function;
+		this.defaultName = defaultName;
+		this.location = location;
+	}
+
+	public String getLocation(){return this.location;}
 
 	@Override
 	protected FlatMapFunction<IN, OUT> getFunction() {
@@ -58,6 +68,25 @@ public class FlatMapOperator<IN, OUT> extends SingleInputUdfOperator<IN, OUT, Fl
 		// create operator
 		FlatMapOperatorBase<IN, OUT, FlatMapFunction<IN, OUT>> po = new FlatMapOperatorBase<IN, OUT, FlatMapFunction<IN, OUT>>(function,
 			new UnaryOperatorInformation<IN, OUT>(getInputType(), getResultType()), name);
+		// set input
+		po.setInput(input);
+		// set parallelism
+		if (this.getParallelism() > 0) {
+			// use specified parallelism
+			po.setParallelism(this.getParallelism());
+		} else {
+			// if no parallelism has been specified, use parallelism of input operator to enable chaining
+			po.setParallelism(input.getParallelism());
+		}
+
+		return po;
+	}
+	@Override
+	protected FlatMapOperatorBase<IN, OUT, FlatMapFunction<IN, OUT>> translateToDataFlow(Operator<IN> input, String location) {
+		String name = getName() != null ? getName() : "FlatMap at " + defaultName;
+		// create operator
+		FlatMapOperatorBase<IN, OUT, FlatMapFunction<IN, OUT>> po = new FlatMapOperatorBase<IN, OUT, FlatMapFunction<IN, OUT>>(function,
+			new UnaryOperatorInformation<IN, OUT>(getInputType(), getResultType()), name, location);
 		// set input
 		po.setInput(input);
 		// set parallelism

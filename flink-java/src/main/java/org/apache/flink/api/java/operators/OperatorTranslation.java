@@ -145,7 +145,7 @@ public class OperatorTranslation {
 
 		Operator<I> input = translate(typedInput);
 
-		org.apache.flink.api.common.operators.Operator<O> dataFlowOp = typedOp.translateToDataFlow(input);
+		org.apache.flink.api.common.operators.Operator<O> dataFlowOp = typedOp.translateToDataFlow(input, op.getLocation());
 
 		if (op instanceof UdfOperator<?>) {
 			@SuppressWarnings("unchecked")
@@ -162,6 +162,7 @@ public class OperatorTranslation {
 						(org.apache.flink.api.common.operators.SingleInputOperator<?, O, ?>) dataFlowOp;
 				// set the semantic properties
 				unaryOp.setSemanticProperties(udfOp.getSemanticProperties());
+				unaryOp.setLocation(dataFlowOp.getLocation());
 			}
 		}
 

@@ -69,6 +69,16 @@ public class GenericDataSourceBase<OUT, T extends InputFormat<OUT, ?>> extends O
 		this.formatWrapper = new UserCodeObjectWrapper<T>(format);
 	}
 
+	public GenericDataSourceBase(T format, OperatorInformation<OUT> operatorInfo, String name, String location) {
+		super(operatorInfo, name, location);
+
+		if (format == null) {
+			throw new IllegalArgumentException("Input format may not be null.");
+		}
+
+		this.formatWrapper = new UserCodeObjectWrapper<T>(format);
+	}
+
 	/**
 	 * Creates a new instance for the given file using the given input format, using the default name.
 	 *

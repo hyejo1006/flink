@@ -109,6 +109,7 @@ import java.util.List;
 public abstract class DataSet<T> {
 
 	protected final ExecutionEnvironment context;
+	protected String location;
 
 	// NOTE: the type must not be accessed directly, but only via getType()
 	private TypeInformation<T> type;
@@ -125,6 +126,23 @@ public abstract class DataSet<T> {
 
 		this.context = context;
 		this.type = typeInfo;
+	}
+
+	protected DataSet(ExecutionEnvironment context, TypeInformation<T> typeInfo, String location) {
+		if (context == null) {
+			throw new NullPointerException("context is null");
+		}
+		if (typeInfo == null) {
+			throw new NullPointerException("typeInfo is null");
+		}
+		if (location == null)
+			this.location="datasetlocation";
+		else this.location=location;
+
+		this.context = context;
+		this.type = typeInfo;
+
+
 	}
 
 	/**
@@ -217,6 +235,16 @@ public abstract class DataSet<T> {
 		return new MapOperator<>(this, resultType, clean(mapper), callLocation);
 	}
 
+	public <R> MapOperator<T, R> map(MapFunction<T, R> mapper, String mapLocation) {
+		if (mapper == null) {
+			throw new NullPointerException("Map function must not be null.");
+		}
+
+		String callLocation = Utils.getCallLocationName();
+		TypeInformation<R> resultType = TypeExtractor.getMapReturnTypes(mapper, getType(), callLocation, true);
+		return new MapOperator<>(this, resultType, clean(mapper), callLocation, mapLocation);
+	}
+
 	/**
 	 * Applies a Map-style operation to the entire partition of the data.
 	 * The function is called once per parallel partition of the data,
@@ -265,6 +293,16 @@ public abstract class DataSet<T> {
 		String callLocation = Utils.getCallLocationName();
 		TypeInformation<R> resultType = TypeExtractor.getFlatMapReturnTypes(flatMapper, getType(), callLocation, true);
 		return new FlatMapOperator<>(this, resultType, clean(flatMapper), callLocation);
+	}
+
+	public <R> FlatMapOperator<T, R> flatMap(FlatMapFunction<T, R> flatMapper, String location) {
+		if (flatMapper == null) {
+			throw new NullPointerException("FlatMap function must not be null.");
+		}
+
+		String callLocation = Utils.getCallLocationName();
+		TypeInformation<R> resultType = TypeExtractor.getFlatMapReturnTypes(flatMapper, getType(), callLocation, true);
+		return new FlatMapOperator<>(this, resultType, clean(flatMapper), callLocation, location);
 	}
 
 	/**
@@ -1238,6 +1276,10 @@ public abstract class DataSet<T> {
 	 * @param other The other DataSet which is unioned with the current DataSet.
 	 * @return The resulting DataSet.
 	 */
+	public UnionOperator<T> union(DataSet<T> other, String location){
+		return new UnionOperator<>(this, other, Utils.getCallLocationName(), location);
+	}
+
 	public UnionOperator<T> union(DataSet<T> other){
 		return new UnionOperator<>(this, other, Utils.getCallLocationName());
 	}

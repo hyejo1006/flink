@@ -43,8 +43,23 @@ public abstract class Operator<OUT, O extends Operator<OUT, O>> extends DataSet<
 
 	protected ResourceSpec preferredResources = ResourceSpec.DEFAULT;
 
+	protected String location;
+
 	protected Operator(ExecutionEnvironment context, TypeInformation<OUT> resultType) {
 		super(context, resultType);
+	}
+
+	protected Operator(ExecutionEnvironment context, TypeInformation<OUT> resultType, String location) {
+		super(context, resultType, location);
+	}
+
+	public String getLocation() { return location;}
+
+	public O setLocation(String newLocation) {
+		this.location = newLocation;
+		@SuppressWarnings("unchecked")
+		O returnType = (O) this;
+		return returnType;
 	}
 
 	/**

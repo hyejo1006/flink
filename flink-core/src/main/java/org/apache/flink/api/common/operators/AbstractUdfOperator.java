@@ -43,6 +43,8 @@ public abstract class AbstractUdfOperator<OUT, FT extends Function> extends Oper
 	 * The extra inputs which parameterize the user function.
 	 */
 	protected final Map<String, Operator<?>> broadcastInputs = new HashMap<>();
+
+	protected String location;
 	
 	// --------------------------------------------------------------------------------------------
 	
@@ -55,6 +57,12 @@ public abstract class AbstractUdfOperator<OUT, FT extends Function> extends Oper
 	protected AbstractUdfOperator(UserCodeWrapper<FT> function, OperatorInformation<OUT> operatorInfo,  String name) {
 		super(operatorInfo, name);
 		this.userFunction = function;
+	}
+
+	protected AbstractUdfOperator(UserCodeWrapper<FT> function, OperatorInformation<OUT> operatorInfo,  String name, String location) {
+		super(operatorInfo, name, location);
+		this.userFunction = function;
+		this.location = location;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -77,6 +85,9 @@ public abstract class AbstractUdfOperator<OUT, FT extends Function> extends Oper
 
 	// --------------------------------------------------------------------------------------------
 
+	public String getLocation(){return location;}
+
+	public void setLocation(String newLocation){this.location=newLocation;}
 	/**
 	 * Returns the input, or null, if none is set.
 	 * 

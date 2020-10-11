@@ -47,6 +47,8 @@ public class WorksetPlanNode extends PlanNode {
 	private final Channel initialInput;
 	
 	public Object postPassHelper;
+
+	protected String location = "worksetplannode";
 	
 	
 	public WorksetPlanNode(WorksetNode template, String nodeName,
@@ -58,6 +60,7 @@ public class WorksetPlanNode extends PlanNode {
 		this.globalProps = gProps;
 		this.localProps = lProps;
 		this.initialInput = initialInput;
+		this.location = template.getLocation();
 		
 		// the node incurs no cost
 		this.nodeCosts = NO_COSTS;
@@ -73,6 +76,8 @@ public class WorksetPlanNode extends PlanNode {
 	}
 	
 	// --------------------------------------------------------------------------------------------
+
+	public String getLocation(){return this.location;}
 	
 	public WorksetNode getWorksetNode() {
 		return (WorksetNode) this.template;

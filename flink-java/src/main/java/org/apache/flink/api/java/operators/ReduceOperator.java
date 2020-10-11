@@ -157,6 +157,11 @@ public class ReduceOperator<IN> extends SingleInputUdfOperator<IN, IN, ReduceOpe
 		}
 	}
 
+	@Override
+	protected Operator<IN> translateToDataFlow(Operator<IN> input, String location) {
+		return null;
+	}
+
 	/**
 	 * Sets the strategy to use for the combine phase of the reduce.
 	 *

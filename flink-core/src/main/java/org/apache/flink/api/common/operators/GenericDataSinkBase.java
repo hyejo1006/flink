@@ -83,6 +83,8 @@ public class GenericDataSinkBase<IN> extends Operator<Nothing> {
 
 	// --------------------------------------------------------------------------------------------
 
+	public String getLocation(){ return super.getLocation();}
+
 	/**
 	 * Returns this operator's input operator.
 	 *

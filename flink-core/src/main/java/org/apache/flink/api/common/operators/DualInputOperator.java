@@ -63,6 +63,8 @@ public abstract class DualInputOperator<IN1, IN2, OUT, FT extends Function> exte
 	 * Semantic properties of the associated function.
 	 */
 	private DualInputSemanticProperties semanticProperties = new DualInputSemanticProperties();
+
+	protected String location;
 	
 	// --------------------------------------------------------------------------------------------
 	
@@ -75,6 +77,12 @@ public abstract class DualInputOperator<IN1, IN2, OUT, FT extends Function> exte
 	protected DualInputOperator(UserCodeWrapper<FT> stub, BinaryOperatorInformation<IN1, IN2, OUT> operatorInfo, String name) {
 		super(stub, operatorInfo, name);
 		this.keyFields1 = this.keyFields2 = new int[0];
+	}
+
+	protected DualInputOperator(UserCodeWrapper<FT> stub, BinaryOperatorInformation<IN1, IN2, OUT> operatorInfo, String name, String location) {
+		super(stub, operatorInfo, name, location);
+		this.keyFields1 = this.keyFields2 = new int[0];
+		this.location=location;
 	}
 	
 	/**
@@ -94,6 +102,9 @@ public abstract class DualInputOperator<IN1, IN2, OUT, FT extends Function> exte
 
 	// --------------------------------------------------------------------------------------------
 
+	public String getLocation(){return location;}
+
+	public void setLocation(String newLocation){this.location=newLocation;}
 	/**
 	 * Gets the information about the operators input/output types.
 	 */

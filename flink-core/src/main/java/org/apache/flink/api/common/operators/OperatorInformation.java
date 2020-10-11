@@ -34,11 +34,16 @@ public class OperatorInformation<OUT> {
 	 */
 	protected final TypeInformation<OUT> outputType;
 
+	protected String location = "opinfo";
 	/**
 	 * @param outputType The output type of the operator
 	 */
 	public OperatorInformation(TypeInformation<OUT> outputType) {
 		this.outputType = outputType;
+	}
+	public OperatorInformation(TypeInformation<OUT> outputType, String location) {
+		this.outputType = outputType;
+		this.location = location;
 	}
 
 	/**
@@ -48,9 +53,11 @@ public class OperatorInformation<OUT> {
 		return outputType;
 	}
 
+	public String getLocation(){return this.location;}
+
 
 	@Override
 	public String toString() {
-		return "Operator Info; Output type: " + outputType;
+		return "Operator Info; Output type: " + outputType + ", location: " + this.location;
 	}
 }

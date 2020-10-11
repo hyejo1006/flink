@@ -103,7 +103,7 @@ public class UnionTranslationTest {
 
 			DataSet<Tuple3<Double, StringValue, LongValue>> dataset3 = getSourceDataSet(env, -1);
 
-			dataset1.union(dataset2).union(dataset3)
+			dataset1.union(dataset2).union(dataset3, "test")
 					.groupBy((KeySelector<Tuple3<Double, StringValue, LongValue>, String>) value -> "")
 					.sortGroup((KeySelector<Tuple3<Double, StringValue, LongValue>, String>) value -> "", Order.ASCENDING)
 					.reduceGroup((GroupReduceFunction<Tuple3<Double, StringValue, LongValue>, String>) (values, out) -> {})

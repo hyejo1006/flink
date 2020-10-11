@@ -37,6 +37,7 @@ import org.apache.flink.util.Visitor;
 public class NAryUnionPlanNode extends PlanNode {
 	
 	private final List<Channel> inputs;
+	protected String location = "naryunionplannode";
 	
 	/**
 	 * @param template
@@ -51,7 +52,10 @@ public class NAryUnionPlanNode extends PlanNode {
 		this.localProps = new LocalProperties();
 		this.nodeCosts = new Costs();
 		this.cumulativeCosts = cumulativeCosts;
+		this.location = template.getLocation();
 	}
+
+	public String getLocation(){return this.location;}
 
 	@Override
 	public void accept(Visitor<PlanNode> visitor) {

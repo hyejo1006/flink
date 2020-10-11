@@ -58,7 +58,7 @@ public class DataSource<OUT> extends Operator<OUT, DataSource<OUT>> {
 	 * @param type The type of the elements produced by this input format.
 	 */
 	public DataSource(ExecutionEnvironment context, InputFormat<OUT, ?> inputFormat, TypeInformation<OUT> type, String dataSourceLocationName) {
-		super(context, type);
+		super(context, type, dataSourceLocationName);
 
 		this.dataSourceLocationName = dataSourceLocationName;
 
@@ -131,7 +131,7 @@ public class DataSource<OUT> extends Operator<OUT, DataSource<OUT>> {
 
 		@SuppressWarnings({"unchecked", "rawtypes"})
 		GenericDataSourceBase<OUT, ?> source = new GenericDataSourceBase(this.inputFormat,
-			new OperatorInformation<OUT>(getType()), name);
+			new OperatorInformation<OUT>(getType()), name, dataSourceLocationName);
 		source.setParallelism(parallelism);
 		if (this.parameters != null) {
 			source.getParameters().addAll(this.parameters);

@@ -49,6 +49,11 @@ public class MapOperatorBase<IN, OUT, FT extends MapFunction<IN, OUT>> extends S
 	public MapOperatorBase(FT udf, UnaryOperatorInformation<IN, OUT> operatorInfo, String name) {
 		super(new UserCodeObjectWrapper<FT>(udf), operatorInfo, name);
 	}
+
+
+	public MapOperatorBase(FT udf, UnaryOperatorInformation<IN, OUT> operatorInfo, String name, String location) {
+		super(new UserCodeObjectWrapper<FT>(udf), operatorInfo, name, location);
+	}
 	
 	public MapOperatorBase(Class<? extends FT> udf, UnaryOperatorInformation<IN, OUT> operatorInfo, String name) {
 		super(new UserCodeClassWrapper<FT>(udf), operatorInfo, name);

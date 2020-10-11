@@ -268,6 +268,9 @@ public class PlanJSONDumpGenerator {
 		
 		// output node name
 		writer.print(",\n\t\t\"pact\": \"" + name + "\"");
+
+		//output node location
+		writer.print(",\n\t\t\"location\": \"" + n.getLocation() + "\"");
 		
 		// output node contents
 		writer.print(",\n\t\t\"contents\": \"" + contents + "\"");

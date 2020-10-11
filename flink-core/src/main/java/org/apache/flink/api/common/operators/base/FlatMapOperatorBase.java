@@ -48,6 +48,10 @@ public class FlatMapOperatorBase<IN, OUT, FT extends FlatMapFunction<IN, OUT>> e
 		super(new UserCodeObjectWrapper<FT>(udf), operatorInfo, name);
 	}
 
+	public FlatMapOperatorBase(FT udf, UnaryOperatorInformation<IN, OUT> operatorInfo, String name, String location) {
+		super(new UserCodeObjectWrapper<FT>(udf), operatorInfo, name, location);
+	}
+
 	public FlatMapOperatorBase(Class<? extends FT> udf, UnaryOperatorInformation<IN, OUT> operatorInfo, String name) {
 		super(new UserCodeClassWrapper<FT>(udf), operatorInfo, name);
 	}

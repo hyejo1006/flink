@@ -1689,6 +1689,15 @@ public class JobGraphGenerator implements Visitor<PlanNode> {
 				vertex.setOperatorName(opName + " -> " + vertex.getOperatorName());
 			}
 
+			// operator location
+			String opLocation = planNode.getLocation();
+			if (vertex.getLocation() == null) {
+				vertex.setLocation(opLocation);
+			}
+			else {
+				vertex.setLocation(opLocation + " -> " + vertex.getLocation());
+			}
+
 			// operator description 
 			String opDescription = JsonMapper.getOperatorStrategyString(planNode.getDriverStrategy());
 			if (vertex.getOperatorDescription() == null) {

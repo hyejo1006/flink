@@ -38,12 +38,15 @@ public class PlanJsonParser {
 
 		// not every node is same, ignore the unknown field
 		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
+		System.out.println("obj: " + objectMapper);
 		PlanTree tree = objectMapper.readValue(t, PlanTree.class);
 		LinkedHashMap<String, Integer> map = new LinkedHashMap<>();
 		StringWriter sw = new StringWriter();
 		PrintWriter pw = new PrintWriter(sw);
 		int tabCount = 0;
+
+		System.out.println("===========json sql plan==============");
+		System.out.println(t);
 
 		for (int index = 0; index < tree.getNodes().size(); index++) {
 			Node tempNode = tree.getNodes().get(index);
@@ -57,7 +60,7 @@ public class PlanJsonParser {
 			}
 
 			printTab(tabCount, pw);
-			pw.print("Stage " + tempNode.getId() + " : " + tempNode.getPact() + "[location=temp_addr]\n");
+			pw.print("Stage " + tempNode.getId() + " : " + tempNode.getPact() + "[location="+tempNode.getLocation()+"]\n");
 
 			printTab(tabCount + 1, pw);
 			String content = tempNode.getContents();

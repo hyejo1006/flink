@@ -205,6 +205,17 @@ abstract class CodeGenerator(
         |""".stripMargin
     }.mkString("", "\n", "\n")
   }
+  def reuseConstructorCode(className: String, location: String): String = {
+    reusableConstructorStatements.map { case (params, body) =>
+      s"""
+         |public $className($params) throws Exception {
+         |  this();
+         |  $body
+         |  this.location=location;
+         |}
+         |""".stripMargin
+    }.mkString("", "\n", "\n")
+  }
 
   /**
     * @return term of the (casted and possibly boxed) first input

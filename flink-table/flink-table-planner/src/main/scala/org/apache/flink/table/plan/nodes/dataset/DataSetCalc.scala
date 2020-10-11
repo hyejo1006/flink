@@ -48,15 +48,17 @@ class DataSetCalc(
     input: RelNode,
     rowRelDataType: RelDataType,
     calcProgram: RexProgram,
-    ruleDescription: String)
+    ruleDescription: String,
+    address: String)
   extends Calc(cluster, traitSet, input, calcProgram)
   with CommonCalc
   with DataSetRel {
 
+  val testaddress = "datasetcalc"
   override def deriveRowType(): RelDataType = rowRelDataType
 
   override def copy(traitSet: RelTraitSet, child: RelNode, program: RexProgram): Calc = {
-    new DataSetCalc(cluster, traitSet, child, getRowType, program, ruleDescription)
+    new DataSetCalc(cluster, traitSet, child, getRowType, program, ruleDescription, testaddress)
   }
 
   override def toString: String = calcToString(calcProgram, getExpressionString)
@@ -67,6 +69,7 @@ class DataSetCalc(
       .itemIf("where",
         conditionToString(calcProgram, getExpressionString),
         calcProgram.getCondition != null)
+      .item("address", testaddress)
   }
 
   override def computeSelfCost(planner: RelOptPlanner, metadata: RelMetadataQuery): RelOptCost = {
@@ -114,6 +117,6 @@ class DataSetCalc(
 
     val runner = new FlatMapRunner(genFunction.name, genFunction.code, returnType)
 
-    inputDS.flatMap(runner).name(calcOpName(calcProgram, getExpressionString))
+    inputDS.flatMap(runner, testaddress).name(calcOpName(calcProgram, getExpressionString))
   }
 }

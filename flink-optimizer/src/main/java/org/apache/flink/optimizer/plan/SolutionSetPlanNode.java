@@ -46,6 +46,8 @@ public class SolutionSetPlanNode extends PlanNode {
 	private final Channel initialInput;
 	
 	public Object postPassHelper;
+
+	protected String location = "SSplannode";
 	
 	
 	public SolutionSetPlanNode(SolutionSetNode template, String nodeName,
@@ -57,6 +59,7 @@ public class SolutionSetPlanNode extends PlanNode {
 		this.globalProps = gProps;
 		this.localProps = lProps;
 		this.initialInput = initialInput;
+		this.location = template.getLocation();
 		
 		// the node incurs no cost
 		this.nodeCosts = NO_COSTS;
@@ -72,7 +75,7 @@ public class SolutionSetPlanNode extends PlanNode {
 	}
 	
 	// --------------------------------------------------------------------------------------------
-	
+	public String getLocation() {return this.location;}
 	public SolutionSetNode getSolutionSetNode() {
 		return (SolutionSetNode) this.template;
 	}

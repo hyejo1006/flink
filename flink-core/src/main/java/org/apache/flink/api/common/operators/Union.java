@@ -41,12 +41,25 @@ public class Union<T> extends DualInputOperator<T, T, T, AbstractRichFunction> {
 		// we pass it an AbstractFunction, because currently all operators expect some form of UDF
 		super(new UserCodeClassWrapper<AbstractRichFunction>(AbstractRichFunction.class), operatorInfo, "Union at "+unionLocationName);
 	}
+
+	public Union(BinaryOperatorInformation<T, T, T> operatorInfo, String unionLocationName, String location) {
+		// we pass it an AbstractFunction, because currently all operators expect some form of UDF
+		super(new UserCodeClassWrapper<AbstractRichFunction>(AbstractRichFunction.class), operatorInfo, "Union at "+unionLocationName, location);
+	}
 	
 	public Union(Operator<T> input1, Operator<T> input2, String unionLocationName) {
 		this(new BinaryOperatorInformation<T, T, T>(input1.getOperatorInfo().getOutputType(),
 				input1.getOperatorInfo().getOutputType(), input1.getOperatorInfo().getOutputType()), unionLocationName);
 		setFirstInput(input1);
 		setSecondInput(input2);
+	}
+
+	public Union(Operator<T> input1, Operator<T> input2, String unionLocationName, String location) {
+		this(new BinaryOperatorInformation<T, T, T>(input1.getOperatorInfo().getOutputType(),
+			input1.getOperatorInfo().getOutputType(), input1.getOperatorInfo().getOutputType()), unionLocationName, location);
+		setFirstInput(input1);
+		setSecondInput(input2);
+		setLocation(location);
 	}
 
 	@Override

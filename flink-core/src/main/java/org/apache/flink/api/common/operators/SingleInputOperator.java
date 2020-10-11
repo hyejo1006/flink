@@ -22,6 +22,7 @@ package org.apache.flink.api.common.operators;
 import java.util.List;
 
 import org.apache.flink.annotation.Internal;
+import org.apache.flink.annotation.Public;
 import org.apache.flink.api.common.ExecutionConfig;
 import org.apache.flink.api.common.functions.Function;
 import org.apache.flink.api.common.functions.RuntimeContext;
@@ -46,6 +47,8 @@ public abstract class SingleInputOperator<IN, OUT, FT extends Function> extends 
 	
 	/** Semantic properties of the associated function. */
 	private SingleInputSemanticProperties semanticProperties = new SingleInputSemanticProperties();
+
+	protected String location = "singleinputop";
 	
 	// --------------------------------------------------------------------------------------------
 
@@ -73,7 +76,15 @@ public abstract class SingleInputOperator<IN, OUT, FT extends Function> extends 
 		this.keyFields = new int[0];
 	}
 
+	protected SingleInputOperator(UserCodeWrapper<FT> stub, UnaryOperatorInformation<IN, OUT> operatorInfo, String name, String location) {
+		super(stub, operatorInfo, name, location);
+		this.keyFields = new int[0];
+		this.location=location;
+	}
+
 	// --------------------------------------------------------------------------------------------
+
+	public String getLocation(){return this.location;}
 
 	/**
 	 * Gets the information about the operators input/output types.

@@ -210,4 +210,139 @@ class FunctionCodeGenerator(
 
     GeneratedFunction(funcName, returnType, funcCode)
   }
+
+  def generateFunction[F <: Function, T <: Any](
+      name: String,
+      clazz: Class[F],
+      bodyCode: String,
+      returnType: TypeInformation[T],
+      location: String)
+  : GeneratedFunction[F, T] = {
+    val funcName = newName(name)
+    val collectorTypeTerm = classOf[Collector[Any]].getCanonicalName
+
+    // Janino does not support generics, that's why we need
+    // manual casting here
+    val (functionClass, signature, inputStatements) =
+    // FlatMapFunction
+    if (clazz == classOf[FlatMapFunction[_, _]]) {
+      val baseClass = classOf[RichFlatMapFunction[_, _]]
+      val inputTypeTerm = boxedTypeTermForTypeInfo(input1)
+      // declaration: make variable accessible for separated method
+      reusableMemberStatements.add(s"private $inputTypeTerm $input1Term;")
+      reusableMemberStatements.add(s"protected String location = $location;")
+      (baseClass,
+        s"void flatMap(Object _in1, $collectorTypeTerm $collectorTerm)",
+        List(s"$input1Term = ($inputTypeTerm) _in1;"))
+    }
+
+    // MapFunction
+    else if (clazz == classOf[MapFunction[_, _]]) {
+      val baseClass = classOf[RichMapFunction[_, _]]
+      val inputTypeTerm = boxedTypeTermForTypeInfo(input1)
+
+      // declaration: make variable accessible for separated method
+      reusableMemberStatements.add(s"private $inputTypeTerm $input1Term;")
+      reusableMemberStatements.add(s"protected String location = $location;")
+      (baseClass,
+        "Object map(Object _in1)",
+        List(s"$input1Term = ($inputTypeTerm) _in1;"))
+    }
+
+    // FlatJoinFunction
+    else if (clazz == classOf[FlatJoinFunction[_, _, _]]) {
+      val baseClass = classOf[RichFlatJoinFunction[_, _, _]]
+      val inputTypeTerm1 = boxedTypeTermForTypeInfo(input1)
+      val inputTypeTerm2 = boxedTypeTermForTypeInfo(input2.getOrElse(
+        throw new CodeGenException("Input 2 for FlatJoinFunction should not be null")))
+      // declaration: make variables accessible for separated methods
+      reusableMemberStatements.add(s"private $inputTypeTerm1 $input1Term;")
+      reusableMemberStatements.add(s"private $inputTypeTerm2 $input2Term;")
+      reusableMemberStatements.add(s"protected String location = $location;")
+      (baseClass,
+        s"void join(Object _in1, Object _in2, $collectorTypeTerm $collectorTerm)",
+        List(s"$input1Term = ($inputTypeTerm1) _in1;",
+          s"$input2Term = ($inputTypeTerm2) _in2;"))
+    }
+
+    // JoinFunction
+    else if (clazz == classOf[JoinFunction[_, _, _]]) {
+      val baseClass = classOf[RichJoinFunction[_, _, _]]
+      val inputTypeTerm1 = boxedTypeTermForTypeInfo(input1)
+      val inputTypeTerm2 = boxedTypeTermForTypeInfo(input2.getOrElse(
+        throw new CodeGenException("Input 2 for JoinFunction should not be null")))
+      // declaration: make variables accessible for separated methods
+      reusableMemberStatements.add(s"private $inputTypeTerm1 $input1Term;")
+      reusableMemberStatements.add(s"private $inputTypeTerm2 $input2Term;")
+      reusableMemberStatements.add(s"protected String location = $location;")
+      (baseClass,
+        s"Object join(Object _in1, Object _in2)",
+        List(s"$input1Term = ($inputTypeTerm1) _in1;",
+          s"$input2Term = ($inputTypeTerm2) _in2;"))
+    }
+
+    // ProcessFunction
+    else if (clazz == classOf[ProcessFunction[_, _]]) {
+      val baseClass = classOf[ProcessFunction[_, _]]
+      val inputTypeTerm = boxedTypeTermForTypeInfo(input1)
+      val contextTypeTerm = classOf[ProcessFunction[Any, Any]#Context].getCanonicalName
+
+      // make context accessible also for split code
+      val globalContext = if (hasCodeSplits) {
+        // declaration
+        reusableMemberStatements.add(s"private $contextTypeTerm $contextTerm;")
+        // assignment
+        List(s"this.$contextTerm = $contextTerm;")
+      } else {
+        Nil
+      }
+
+      // declaration: make variable accessible for separated method
+      reusableMemberStatements.add(s"private $inputTypeTerm $input1Term;")
+      reusableMemberStatements.add(s"protected String location = $location;")
+      (baseClass,
+        s"void processElement(Object _in1, $contextTypeTerm $contextTerm, " +
+          s"$collectorTypeTerm $collectorTerm)",
+        List(s"$input1Term = ($inputTypeTerm) _in1;") ++ globalContext)
+    }
+    else {
+      // TODO more functions
+      throw new CodeGenException("Unsupported Function.")
+    }
+
+    val funcCode = j"""
+                      |public class $funcName extends ${functionClass.getCanonicalName} {
+                      |
+                      |  ${reuseMemberCode()}
+                      |
+                      |  public $funcName() throws Exception {
+                      |    ${reuseInitCode()}
+                      |  }
+                      |
+                      |  ${reuseConstructorCode(funcName, location)}
+                      |
+                      |  @Override
+                      |  public void open(${classOf[Configuration].getCanonicalName} parameters) throws Exception {
+                      |    ${reuseOpenCode()}
+                      |  }
+                      |
+                      |  public String getLocation() { return this.location;}
+                      |
+                      |  @Override
+                      |  public $signature throws Exception {
+                      |    ${inputStatements.mkString("\n")}
+                      |    ${reuseInputUnboxingCode()}
+                      |    ${reusePerRecordCode()}
+                      |    $bodyCode
+                      |  }
+                      |
+                      |  @Override
+                      |  public void close() throws Exception {
+                      |    ${reuseCloseCode()}
+                      |  }
+                      |}
+                      |""".stripMargin
+
+    GeneratedFunction(funcName, returnType, funcCode)
+  }
 }

@@ -47,6 +47,8 @@ public class BulkPartialSolutionPlanNode extends PlanNode {
 	private Channel initialInput;
 	
 	public Object postPassHelper;
+
+	protected String location="bpsplannode";
 	
 	
 	public BulkPartialSolutionPlanNode(BulkPartialSolutionNode template, String nodeName,
@@ -58,6 +60,7 @@ public class BulkPartialSolutionPlanNode extends PlanNode {
 		this.globalProps = gProps;
 		this.localProps = lProps;
 		this.initialInput = initialInput;
+		this.location = template.getLocation();
 		
 		// the partial solution does not cost anything
 		this.nodeCosts = NO_COSTS;
@@ -73,6 +76,8 @@ public class BulkPartialSolutionPlanNode extends PlanNode {
 	}
 	
 	// --------------------------------------------------------------------------------------------
+
+	public String getLocation(){return this.location;}
 	
 	public BulkPartialSolutionNode getPartialSolutionNode() {
 		return (BulkPartialSolutionNode) this.template;

@@ -216,7 +216,7 @@ abstract class BatchTableEnvImpl(
         System.lineSeparator +
         s"${RelOptUtil.toString(optimizedPlan)}" +
         System.lineSeparator +
-        s"== Physical Execution Plan ==" +
+        s"== Physical test Execution Plan ==" +
         System.lineSeparator +
         s"$sqlPlan"
   }

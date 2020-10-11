@@ -49,6 +49,8 @@ public abstract class Operator<OUT> implements Visitable<Operator<?>> {
 
 	private ResourceSpec preferredResources = ResourceSpec.DEFAULT;    // the preferred resource of the contract instance.
 
+	protected String location="operatortest";
+
 	/**
 	 * The return type of the user function.
 	 */
@@ -69,6 +71,21 @@ public abstract class Operator<OUT> implements Visitable<Operator<?>> {
 		this.operatorInfo = operatorInfo;
 	}
 
+	protected Operator(OperatorInformation<OUT> operatorInfo, String name, String location) {
+		this.name = (name == null) ? "(null)" : name;
+		this.parameters = new Configuration();
+		this.compilerHints = new CompilerHints();
+		this.operatorInfo = operatorInfo;
+		this.location = location;
+	}
+
+	public String getLocation(){
+		return location;
+	}
+
+	public void setLocation(String newLocation){
+		this.location=newLocation;
+	}
 	/**
 	 * Gets the information about the operators input/output types.
 	 */
@@ -321,6 +338,6 @@ public abstract class Operator<OUT> implements Visitable<Operator<?>> {
 
 	@Override
 	public String toString() {
-		return getClass().getSimpleName() + " - " + getName();
+		return getClass().getSimpleName() + " - " + getName() + getLocation();
 	}
 }

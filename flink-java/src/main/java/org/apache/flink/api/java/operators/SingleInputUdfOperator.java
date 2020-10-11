@@ -62,6 +62,8 @@ public abstract class SingleInputUdfOperator<IN, OUT, O extends SingleInputUdfOp
 
 	private boolean analyzedUdfSemantics;
 
+	protected String location = "singleinputudfop";
+
 	// --------------------------------------------------------------------------------------------
 
 	/**
@@ -74,9 +76,14 @@ public abstract class SingleInputUdfOperator<IN, OUT, O extends SingleInputUdfOp
 	protected SingleInputUdfOperator(DataSet<IN> input, TypeInformation<OUT> resultType) {
 		super(input, resultType);
 	}
+	protected SingleInputUdfOperator(DataSet<IN> input, TypeInformation<OUT> resultType, String location) {
+		super(input, resultType, location);
+		this.location=location;
+	}
 
 	protected abstract Function getFunction();
 
+	public String getLocation(){return this.location;}
 	// --------------------------------------------------------------------------------------------
 	// Fluent API methods
 	// --------------------------------------------------------------------------------------------

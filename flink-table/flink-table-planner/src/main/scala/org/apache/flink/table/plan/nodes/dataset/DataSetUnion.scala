@@ -46,8 +46,7 @@ class DataSetUnion(
   extends Union(cluster, traitSet, inputs, true)
   with DataSetRel {
 
-  var testddress = "address"
-  def getAddress() : String ={ return testddress}
+  var testaddress = "unionaddress"
 
   override def deriveRowType() = rowRelDataType
 
@@ -71,7 +70,7 @@ class DataSetUnion(
 
   override def explainTerms(pw: RelWriter): RelWriter = {
     super.explainTerms(pw).item("union", unionSelectionToString)
-      .item("address", "testAddress")
+      .item("address", testaddress)
   }
 
   override def computeSelfCost (planner: RelOptPlanner, metadata: RelMetadataQuery): RelOptCost = {
@@ -96,7 +95,7 @@ class DataSetUnion(
     getInputs
       .asScala
       .map(_.asInstanceOf[DataSetRel].translateToPlan(tableEnv, queryConfig))
-      .reduce((dataSetLeft, dataSetRight) => dataSetLeft.union(dataSetRight))
+      .reduce((dataSetLeft, dataSetRight) => dataSetLeft.union(dataSetRight, testaddress))
   }
 
   private def unionSelectionToString: String = {

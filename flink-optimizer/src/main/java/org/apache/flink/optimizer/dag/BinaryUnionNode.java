@@ -48,6 +48,7 @@ import org.apache.flink.runtime.operators.shipping.ShipStrategyType;
 public class BinaryUnionNode extends TwoInputNode {
 	
 	private Set<RequestedGlobalProperties> channelProps;
+	protected String location = "binaryunionnode";
 
 	public BinaryUnionNode(Union<?> union){
 		super(union);
@@ -61,6 +62,8 @@ public class BinaryUnionNode extends TwoInputNode {
 		}
 		super.addOutgoingConnection(connection);
 	}
+
+	public String getLocation(){return super.getLocation();}
 
 	@Override
 	public String getOperatorName() {

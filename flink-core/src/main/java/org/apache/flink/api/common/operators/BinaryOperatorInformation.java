@@ -42,6 +42,8 @@ public class BinaryOperatorInformation<IN1, IN2, OUT> extends OperatorInformatio
 	 */
 	protected final TypeInformation<IN2> inputType2;
 
+	protected String location;
+
 	/**
 	 * @param inputType1 Input type of first input
 	 * @param inputType2 Input type of second input
@@ -53,6 +55,13 @@ public class BinaryOperatorInformation<IN1, IN2, OUT> extends OperatorInformatio
 		this.inputType2 = inputType2;
 	}
 
+	public BinaryOperatorInformation(TypeInformation<IN1> inputType1, TypeInformation<IN2> inputType2, TypeInformation<OUT> outputType, String location) {
+		super(outputType);
+		this.inputType1 = inputType1;
+		this.inputType2 = inputType2;
+		this.location = location;
+	}
+
 	public TypeInformation<IN1> getFirstInputType() {
 		return inputType1;
 	}
@@ -61,4 +70,5 @@ public class BinaryOperatorInformation<IN1, IN2, OUT> extends OperatorInformatio
 		return inputType2;
 	}
 
+	public String getLocation(){return location;}
 }

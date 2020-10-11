@@ -56,7 +56,8 @@ public class DualInputPlanNode extends PlanNode {
 	
 	public Object postPassHelper1;
 	public Object postPassHelper2;
-	
+
+	protected String location="dualinputplannode";
 	// --------------------------------------------------------------------------------------------
 
 	public DualInputPlanNode(OptimizerNode template, String nodeName, Channel input1, Channel input2, DriverStrategy diverStrategy) {
@@ -79,6 +80,7 @@ public class DualInputPlanNode extends PlanNode {
 		this.keys1 = driverKeyFields1;
 		this.keys2 = driverKeyFields2;
 		this.sortOrders = driverSortOrders;
+		this.location = template.getLocation();
 		
 		if (this.input1.getShipStrategy() == ShipStrategyType.BROADCAST) {
 			this.input1.setReplicationFactor(getParallelism());
@@ -153,7 +155,9 @@ public class DualInputPlanNode extends PlanNode {
 	public Channel getInput2() {
 		return this.input2;
 	}
-	
+
+	public String getLocation(){return this.location;}
+
 	// --------------------------------------------------------------------------------------------
 	
 

@@ -56,6 +56,8 @@ class DataSetScan(
     RelOptTableImpl.create(catalog, rowRelDataType, List[String]().asJava, null))
   with BatchScan {
 
+  var testaddress = "scanaddress"
+
   override def deriveRowType(): RelDataType = rowRelDataType
 
   override def estimateRowCount(mq: RelMetadataQuery): Double = 1000L
@@ -73,7 +75,7 @@ class DataSetScan(
       inputDataSet,
       fieldIdxs,
       getRowType,
-      "testAddress"
+      testaddress
     )
   }
 
@@ -82,11 +84,11 @@ class DataSetScan(
       queryConfig: BatchQueryConfig): DataSet[Row] = {
     val schema = new RowSchema(rowRelDataType)
     val config = tableEnv.getConfig
-    convertToInternalRow(schema, inputDataSet.asInstanceOf[DataSet[Any]], fieldIdxs, config, None)
+    convertToInternalRow(schema, inputDataSet.asInstanceOf[DataSet[Any]], fieldIdxs, config, None, testaddress)
   }
 
   override def explainTerms(pw: RelWriter): RelWriter = pw
     .item("ref", System.identityHashCode(inputDataSet))
     .item("fields", String.join(", ", rowRelDataType.getFieldNames))
-    .item("address", "testAddress")
+    .item("address", testaddress)
 }

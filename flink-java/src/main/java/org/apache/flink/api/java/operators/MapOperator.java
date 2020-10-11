@@ -42,12 +42,24 @@ public class MapOperator<IN, OUT> extends SingleInputUdfOperator<IN, OUT, MapOpe
 
 	protected final String defaultName;
 
+	protected String location = "mapop";
+
 	public MapOperator(DataSet<IN> input, TypeInformation<OUT> resultType, MapFunction<IN, OUT> function, String defaultName) {
 		super(input, resultType);
 
 		this.defaultName = defaultName;
 		this.function = function;
 	}
+
+	public MapOperator(DataSet<IN> input, TypeInformation<OUT> resultType, MapFunction<IN, OUT> function, String defaultName, String location) {
+		super(input, resultType, location);
+
+		this.defaultName = defaultName;
+		this.function = function;
+		this.location = location;
+	}
+
+	public String getLocation(){return this.location;}
 
 	@Override
 	protected MapFunction<IN, OUT> getFunction() {
@@ -61,6 +73,27 @@ public class MapOperator<IN, OUT> extends SingleInputUdfOperator<IN, OUT, MapOpe
 		// create operator
 		MapOperatorBase<IN, OUT, MapFunction<IN, OUT>> po = new MapOperatorBase<IN, OUT, MapFunction<IN, OUT>>(function,
 				new UnaryOperatorInformation<IN, OUT>(getInputType(), getResultType()), name);
+		// set input
+		po.setInput(input);
+		// set parallelism
+		if (this.getParallelism() > 0) {
+			// use specified parallelism
+			po.setParallelism(this.getParallelism());
+		} else {
+			// if no parallelism has been specified, use parallelism of input operator to enable chaining
+			po.setParallelism(input.getParallelism());
+		}
+
+		return po;
+	}
+
+	@Override
+	protected MapOperatorBase<IN, OUT, MapFunction<IN, OUT>> translateToDataFlow(Operator<IN> input, String location) {
+
+		String name = getName() != null ? getName() : "Map at " + defaultName;
+		// create operator
+		MapOperatorBase<IN, OUT, MapFunction<IN, OUT>> po = new MapOperatorBase<IN, OUT, MapFunction<IN, OUT>>(function,
+			new UnaryOperatorInformation<IN, OUT>(getInputType(), getResultType()), name, location);
 		// set input
 		po.setInput(input);
 		// set parallelism

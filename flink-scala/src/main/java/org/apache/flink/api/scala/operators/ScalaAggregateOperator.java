@@ -225,6 +225,11 @@ public class ScalaAggregateOperator<IN> extends SingleInputOperator<IN, IN, Scal
 
 	}
 
+	@Override
+	protected Operator<IN> translateToDataFlow(Operator<IN> input, String location) {
+		return null;
+	}
+
 	// --------------------------------------------------------------------------------------------
 
 	@Internal

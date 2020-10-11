@@ -71,6 +71,8 @@ public abstract class OptimizerNode implements Visitable<OptimizerNode>, Estimat
 	// --------------------------------------------------------------------------------------------
 
 	private final Operator<?> operator; // The operator (Reduce / Join / DataSource / ...)
+
+	private String location="optimizernode";
 	
 	private List<String> broadcastConnectionNames = new ArrayList<String>(); // the broadcast inputs names of this node
 	
@@ -122,6 +124,7 @@ public abstract class OptimizerNode implements Visitable<OptimizerNode>, Estimat
 	 */
 	public OptimizerNode(Operator<?> op) {
 		this.operator = op;
+		this.location = op.getLocation();
 		readStubAnnotations();
 	}
 	
@@ -141,6 +144,7 @@ public abstract class OptimizerNode implements Visitable<OptimizerNode>, Estimat
 		this.id = toCopy.id;
 		this.costWeight = toCopy.costWeight;
 		this.onDynamicPath = toCopy.onDynamicPath;
+		this.location = toCopy.operator.getLocation();
 	}
 
 	// ------------------------------------------------------------------------
@@ -308,6 +312,11 @@ public abstract class OptimizerNode implements Visitable<OptimizerNode>, Estimat
 		} else {
 			throw new IllegalStateException("Id has already been initialized.");
 		}
+	}
+
+	public String getLocation() { return this.location;}
+	public void setLocation(String newLocation){
+		this.location=newLocation;
 	}
 
 	/**

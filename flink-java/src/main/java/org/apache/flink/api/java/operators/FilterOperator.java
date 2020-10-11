@@ -70,4 +70,9 @@ public class FilterOperator<T> extends SingleInputUdfOperator<T, T, FilterOperat
 
 		return po;
 	}
+
+	@Override
+	protected Operator<T> translateToDataFlow(Operator<T> input, String location) {
+		return null;
+	}
 }

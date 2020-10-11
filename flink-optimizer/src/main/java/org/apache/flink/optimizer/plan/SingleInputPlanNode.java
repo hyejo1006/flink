@@ -52,6 +52,8 @@ public class SingleInputPlanNode extends PlanNode {
 	private TypeComparatorFactory<?>[] comparators;
 	
 	public Object postPassHelper;
+
+	protected String location="singleinputplannode";
 	
 	// --------------------------------------------------------------------------------------------
 
@@ -70,6 +72,7 @@ public class SingleInputPlanNode extends PlanNode {
 	{
 		super(template, nodeName, driverStrategy);
 		this.input = input;
+		this.location = template.getLocation();
 		
 		this.comparators = new TypeComparatorFactory<?>[driverStrategy.getNumRequiredComparators()];
 		this.driverKeys = new FieldList[driverStrategy.getNumRequiredComparators()];
@@ -104,7 +107,8 @@ public class SingleInputPlanNode extends PlanNode {
 			throw new RuntimeException();
 		}
 	}
-	
+
+	public String getLocation(){return this.location;}
 	/**
 	 * Gets the input channel to this node.
 	 * 

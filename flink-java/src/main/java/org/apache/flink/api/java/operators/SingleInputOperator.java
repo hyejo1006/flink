@@ -32,10 +32,16 @@ import org.apache.flink.api.java.DataSet;
 public abstract class SingleInputOperator<IN, OUT, O extends SingleInputOperator<IN, OUT, O>> extends Operator<OUT, O> {
 
 	private final DataSet<IN> input;
+	protected String location="javasingleinputop";
 
 	protected SingleInputOperator(DataSet<IN> input, TypeInformation<OUT> resultType) {
 		super(input.getExecutionEnvironment(), resultType);
 		this.input = input;
+	}
+	protected SingleInputOperator(DataSet<IN> input, TypeInformation<OUT> resultType, String location) {
+		super(input.getExecutionEnvironment(), resultType, location);
+		this.input = input;
+		this.location=location;
 	}
 
 	/**
@@ -43,6 +49,9 @@ public abstract class SingleInputOperator<IN, OUT, O extends SingleInputOperator
 	 *
 	 * @return The data set that this operation uses as its input.
 	 */
+
+	public String getLocation(){return this.location;}
+
 	public DataSet<IN> getInput() {
 		return this.input;
 	}
@@ -65,5 +74,8 @@ public abstract class SingleInputOperator<IN, OUT, O extends SingleInputOperator
 	 */
 	protected abstract org.apache.flink.api.common.operators.Operator<OUT> translateToDataFlow(
 			org.apache.flink.api.common.operators.Operator<IN> input);
+
+	protected abstract org.apache.flink.api.common.operators.Operator<OUT> translateToDataFlow(
+		org.apache.flink.api.common.operators.Operator<IN> input, String location);
 
 }

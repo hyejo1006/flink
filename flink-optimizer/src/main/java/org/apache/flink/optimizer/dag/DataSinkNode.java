@@ -86,6 +86,9 @@ public class DataSinkNode extends OptimizerNode {
 	 * @return The node's underlying operator.
 	 */
 	@Override
+	public String getLocation(){return super.getLocation();}
+
+	@Override
 	public GenericDataSinkBase<?> getOperator() {
 		return (GenericDataSinkBase<?>) super.getOperator();
 	}

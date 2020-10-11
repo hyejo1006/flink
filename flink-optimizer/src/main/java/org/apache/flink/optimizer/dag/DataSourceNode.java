@@ -105,6 +105,9 @@ public class DataSourceNode extends OptimizerNode {
 	 * @return The contract.
 	 */
 	@Override
+	public String getLocation(){return super.getLocation();}
+
+	@Override
 	public GenericDataSourceBase<?, ?> getOperator() {
 		return (GenericDataSourceBase<?, ?>) super.getOperator();
 	}

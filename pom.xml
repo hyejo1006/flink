@@ -86,7 +86,6 @@ under the License.
 		<module>flink-docs</module>
 		<module>flink-python</module>
 		<module>flink-ml-parent</module>
-		<module>masterthesis</module>
 	</modules>
 
 	<properties>

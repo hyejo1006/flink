@@ -52,6 +52,8 @@ import java.util.Set;
 public abstract class PlanNode implements Visitable<PlanNode>, DumpableNode<PlanNode> {
 	
 	protected final OptimizerNode template;
+
+	protected String location="plannodelocation";
 	
 	protected final List<Channel> outChannels;
 	
@@ -87,6 +89,7 @@ public abstract class PlanNode implements Visitable<PlanNode>, DumpableNode<Plan
 		this.driverStrategy = strategy;
 		
 		this.parallelism = template.getParallelism();
+		this.location = template.getOperator().getLocation();
 
 		// check, if there is branch at this node. if yes, this candidate must be associated with
 		// the branching template node.
@@ -150,7 +153,10 @@ public abstract class PlanNode implements Visitable<PlanNode>, DumpableNode<Plan
 	public Operator<?> getProgramOperator() {
 		return this.template.getOperator();
 	}
-	
+	public String getLocation(){ return this.location;}
+	public void setLocation(String newLocation){
+		this.location=newLocation;
+	}
 	/**
 	 * Gets the name of the plan node.
 	 * 

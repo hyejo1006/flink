@@ -93,6 +93,11 @@ public class ProjectOperator<IN, OUT extends Tuple>
 		return ppo;
 	}
 
+	@Override
+	protected Operator<OUT> translateToDataFlow(Operator<IN> input, String location) {
+		return null;
+	}
+
 	/**
 	 * @deprecated Deprecated method only kept for compatibility.
 	 */

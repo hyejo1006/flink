@@ -108,6 +108,11 @@ public class DistinctOperator<T> extends SingleInputOperator<T, T, DistinctOpera
 		}
 	}
 
+	@Override
+	protected Operator<T> translateToDataFlow(Operator<T> input, String location) {
+		return null;
+	}
+
 	/**
 	 * Sets the strategy to use for the combine phase of the reduce.
 	 *

@@ -290,6 +290,11 @@ public class GroupReduceOperator<IN, OUT> extends SingleInputUdfOperator<IN, OUT
 		}
 	}
 
+	@Override
+	protected Operator<OUT> translateToDataFlow(Operator<IN> input, String location) {
+		return null;
+	}
+
 	// --------------------------------------------------------------------------------------------
 
 	@SuppressWarnings("unchecked")

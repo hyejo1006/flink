@@ -117,6 +117,8 @@ public class JobVertex implements java.io.Serializable {
 	/** The input dependency constraint to schedule this vertex. */
 	private InputDependencyConstraint inputDependencyConstraint = InputDependencyConstraint.ANY;
 
+	protected String location="jobvertex";
+
 	// --------------------------------------------------------------------------------------------
 
 	/**
@@ -536,6 +538,13 @@ public class JobVertex implements java.io.Serializable {
 
 	public void setOperatorName(String operatorName) {
 		this.operatorName = operatorName;
+	}
+	public String getLocation() {
+		return location;
+	}
+
+	public void setLocation(String newLocation) {
+		this.location = newLocation;
 	}
 
 	public String getOperatorDescription() {

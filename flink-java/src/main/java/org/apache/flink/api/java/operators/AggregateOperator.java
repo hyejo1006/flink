@@ -238,6 +238,11 @@ public class AggregateOperator<IN> extends SingleInputOperator<IN, IN, Aggregate
 
 	}
 
+	@Override
+	protected Operator<IN> translateToDataFlow(Operator<IN> input, String location) {
+		return null;
+	}
+
 	// --------------------------------------------------------------------------------------------
 
 	@Internal

@@ -204,6 +204,11 @@ public class SortPartitionOperator<T> extends SingleInputOperator<T, T, SortPart
 
 	}
 
+	@Override
+	protected Operator<T> translateToDataFlow(Operator<T> input, String location) {
+		return null;
+	}
+
 	private <K> org.apache.flink.api.common.operators.SingleInputOperator<?, T, ?> translateToDataFlowWithKeyExtractor(
 		Operator<T> input, Keys.SelectorFunctionKeys<T, K> keys, Order order, String name) {
 		TypeInformation<Tuple2<K, T>> typeInfoWithKey = KeyFunctions.createTypeWithKey(keys);

@@ -182,6 +182,11 @@ public class PartitionOperator<T> extends SingleInputOperator<T, T, PartitionOpe
 		}
 	}
 
+	@Override
+	protected Operator<T> translateToDataFlow(Operator<T> input, String location) {
+		return null;
+	}
+
 	private static <T> Ordering computeOrdering(Keys<T> pKeys, Order[] orders) {
 		Ordering ordering = new Ordering();
 		final int[] logicalKeyPositions = pKeys.computeLogicalKeyPositions();

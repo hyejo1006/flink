@@ -187,6 +187,79 @@ public class GroupCombineOperator<IN, OUT> extends SingleInputUdfOperator<IN, OU
 		}
 	}
 
+	@Override
+	protected GroupCombineOperatorBase<?, OUT, ?> translateToDataFlow(Operator<IN> input, String location) {
+
+		String name = getName() != null ? getName() : "GroupCombine at " + defaultName;
+
+		// distinguish between grouped reduce and non-grouped reduce
+		if (grouper == null) {
+			// non grouped reduce
+			UnaryOperatorInformation<IN, OUT> operatorInfo = new UnaryOperatorInformation<>(getInputType(), getResultType());
+			GroupCombineOperatorBase<IN, OUT, GroupCombineFunction<IN, OUT>> po =
+				new GroupCombineOperatorBase<>(function, operatorInfo, new int[0], name);
+
+			po.setInput(input);
+			// the parallelism for a non grouped reduce can only be 1
+			po.setParallelism(1);
+			return po;
+		}
+
+		if (grouper.getKeys() instanceof SelectorFunctionKeys) {
+
+			@SuppressWarnings("unchecked")
+			SelectorFunctionKeys<IN, ?> selectorKeys = (SelectorFunctionKeys<IN, ?>) grouper.getKeys();
+
+			if (grouper instanceof SortedGrouping) {
+
+				SortedGrouping<IN> sortedGrouping = (SortedGrouping<IN>) grouper;
+				SelectorFunctionKeys<IN, ?> sortKeys = sortedGrouping.getSortSelectionFunctionKey();
+				Ordering groupOrder = sortedGrouping.getGroupOrdering();
+
+				PlanUnwrappingSortedGroupCombineOperator<IN, OUT, ?, ?> po =
+					translateSelectorFunctionSortedReducer(selectorKeys, sortKeys, groupOrder, function, getResultType(), name, input);
+
+				po.setParallelism(this.getParallelism());
+				return po;
+			} else {
+				PlanUnwrappingGroupCombineOperator<IN, OUT, ?> po = translateSelectorFunctionReducer(
+					selectorKeys, function, getResultType(), name, input);
+
+				po.setParallelism(this.getParallelism());
+				return po;
+			}
+		}
+		else if (grouper.getKeys() instanceof Keys.ExpressionKeys) {
+
+			int[] logicalKeyPositions = grouper.getKeys().computeLogicalKeyPositions();
+			UnaryOperatorInformation<IN, OUT> operatorInfo = new UnaryOperatorInformation<>(getInputType(), getResultType());
+			GroupCombineOperatorBase<IN, OUT, GroupCombineFunction<IN, OUT>> po =
+				new GroupCombineOperatorBase<>(function, operatorInfo, logicalKeyPositions, name);
+
+			po.setInput(input);
+			po.setParallelism(getParallelism());
+
+			// set group order
+			if (grouper instanceof SortedGrouping) {
+				SortedGrouping<IN> sortedGrouper = (SortedGrouping<IN>) grouper;
+
+				int[] sortKeyPositions = sortedGrouper.getGroupSortKeyPositions();
+				Order[] sortOrders = sortedGrouper.getGroupSortOrders();
+
+				Ordering o = new Ordering();
+				for (int i = 0; i < sortKeyPositions.length; i++) {
+					o.appendOrdering(sortKeyPositions[i], null, sortOrders[i]);
+				}
+				po.setGroupOrder(o);
+			}
+
+			return po;
+		}
+		else {
+			throw new UnsupportedOperationException("Unrecognized key type.");
+		}
+	}
+
 	// --------------------------------------------------------------------------------------------
 
 	@SuppressWarnings("unchecked")

@@ -174,6 +174,8 @@ public class JsonMapper {
 			final OptimizerNode optNode = node.getOptimizerNode();
 			
 			gen.writeStartObject();
+			if(node.getLocation() != null)
+				gen.writeStringField("location", node.getLocation());
 			
 			// global properties
 			if (node.getGlobalProperties() != null) {

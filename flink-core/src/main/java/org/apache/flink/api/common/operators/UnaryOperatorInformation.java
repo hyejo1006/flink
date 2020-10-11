@@ -35,6 +35,7 @@ public class UnaryOperatorInformation<IN, OUT> extends OperatorInformation<OUT> 
 	 * Input Type of the operator
 	 */
 	protected final TypeInformation<IN> inputType;
+	protected String location = "unaryopinfo";
 
 	/**
 	 * @param inputType Input type of first input
@@ -44,8 +45,14 @@ public class UnaryOperatorInformation<IN, OUT> extends OperatorInformation<OUT> 
 		super(outputType);
 		this.inputType = inputType;
 	}
+	public UnaryOperatorInformation(TypeInformation<IN> inputType, TypeInformation<OUT> outputType, String location) {
+		super(outputType, location);
+		this.inputType = inputType;
+		this.location = location;
+	}
 
 	public TypeInformation<IN> getInputType() {
 		return inputType;
 	}
+	public String getLocation(){return this.location;}
 }

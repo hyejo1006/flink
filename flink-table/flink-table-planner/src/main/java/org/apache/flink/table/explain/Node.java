@@ -36,6 +36,13 @@ public class Node {
 	private List<Estimates> estimates;
 	private List<Costs> costs;
 	private List<CompilerHints> compilerHints;
+	private String location;
+
+	public String getLocation() {
+		if(location==null)
+			location = "testNodeLocation";
+		return location;
+	}
 
 	public int getId() {
 		return id;

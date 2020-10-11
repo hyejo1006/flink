@@ -73,4 +73,9 @@ public class MapPartitionOperator<IN, OUT> extends SingleInputUdfOperator<IN, OU
 
 		return po;
 	}
+
+	@Override
+	protected Operator<OUT> translateToDataFlow(Operator<IN> input, String location) {
+		return null;
+	}
 }

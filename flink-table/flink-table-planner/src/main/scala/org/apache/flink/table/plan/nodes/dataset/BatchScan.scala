@@ -37,10 +37,12 @@ trait BatchScan extends CommonScan[Row] with DataSetRel {
       input: DataSet[T],
       fieldIdxs: Array[Int],
       config: TableConfig,
-      rowtimeExpression: Option[RexNode]): DataSet[Row] = {
+      rowtimeExpression: Option[RexNode],
+      address: String): DataSet[Row] = {
 
     val inputType = input.getType
     val internalType = schema.typeInfo
+    val batchscanAddress = address
 
     val hasTimeIndicator = fieldIdxs.exists(f =>
       f == TimeIndicatorTypeInfo.ROWTIME_BATCH_MARKER ||
@@ -56,7 +58,8 @@ trait BatchScan extends CommonScan[Row] with DataSetRel {
         "DataSetSourceConversion",
         schema.fieldNames,
         fieldIdxs,
-        rowtimeExpression)
+        rowtimeExpression,
+        batchscanAddress)
 
       val runner = new MapRunner[T, Row](
         function.name,
@@ -71,6 +74,43 @@ trait BatchScan extends CommonScan[Row] with DataSetRel {
     else {
       input.asInstanceOf[DataSet[Row]]
     }
+  }
+
+  private def generateConversionMapper(
+      config: TableConfig,
+      inputType: TypeInformation[_],
+      outputType: TypeInformation[Row],
+      conversionOperatorName: String,
+      fieldNames: Seq[String],
+      inputFieldMapping: Array[Int],
+      rowtimeExpression: Option[RexNode],
+      address: String): GeneratedFunction[MapFunction[_, Row], Row] = {
+
+    val generator = new FunctionCodeGenerator(
+      config,
+      false,
+      inputType,
+      None,
+      Some(inputFieldMapping))
+    val location = address
+
+    val conversion = generator.generateConverterResultExpression(
+      outputType,
+      fieldNames,
+      rowtimeExpression)
+
+    val body =
+      s"""
+         |${conversion.code}
+         |return ${conversion.resultTerm};
+         |""".stripMargin
+
+    generator.generateFunction(
+      "DataSetSourceConversion",
+      classOf[MapFunction[_, Row]],
+      body,
+      outputType,
+      location)
   }
 
   private def generateConversionMapper(
