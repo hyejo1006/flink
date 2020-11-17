@@ -105,6 +105,8 @@ public abstract class JoinOperator<I1, I2, OUT> extends TwoInputUdfOperator<I1, 
 
 	private Partitioner<?> customPartitioner;
 
+	protected String location = "joinop";
+
 	protected JoinOperator(DataSet<I1> input1, DataSet<I2> input2,
 			Keys<I1> keys1, Keys<I2> keys2,
 			TypeInformation<OUT> returnType, JoinHint hint, JoinType type) {
@@ -112,6 +114,48 @@ public abstract class JoinOperator<I1, I2, OUT> extends TwoInputUdfOperator<I1, 
 
 		Preconditions.checkNotNull(keys1);
 		Preconditions.checkNotNull(keys2);
+
+		try {
+			if (!keys1.areCompatible(keys2)) {
+				throw new InvalidProgramException("The types of the key fields do not match.");
+			}
+		}
+		catch (IncompatibleKeysException ike) {
+			throw new InvalidProgramException("The types of the key fields do not match: " + ike.getMessage(), ike);
+		}
+
+		// sanity check solution set key mismatches
+		if (input1 instanceof SolutionSetPlaceHolder) {
+			if (keys1 instanceof ExpressionKeys) {
+				int[] positions = keys1.computeLogicalKeyPositions();
+				((SolutionSetPlaceHolder<?>) input1).checkJoinKeyFields(positions);
+			} else {
+				throw new InvalidProgramException("Currently, the solution set may only be joined with using tuple field positions.");
+			}
+		}
+		if (input2 instanceof SolutionSetPlaceHolder) {
+			if (keys2 instanceof ExpressionKeys) {
+				int[] positions = keys2.computeLogicalKeyPositions();
+				((SolutionSetPlaceHolder<?>) input2).checkJoinKeyFields(positions);
+			} else {
+				throw new InvalidProgramException("Currently, the solution set may only be joined with using tuple field positions.");
+			}
+		}
+
+		this.keys1 = keys1;
+		this.keys2 = keys2;
+		this.joinHint = hint == null ? InnerJoinOperatorBase.JoinHint.OPTIMIZER_CHOOSES : hint;
+		this.joinType = type;
+	}
+
+	protected JoinOperator(DataSet<I1> input1, DataSet<I2> input2,
+						   Keys<I1> keys1, Keys<I2> keys2,
+						   TypeInformation<OUT> returnType, JoinHint hint, JoinType type, String location) {
+		super(input1, input2, returnType, location);
+
+		Preconditions.checkNotNull(keys1);
+		Preconditions.checkNotNull(keys2);
+		this.location = location;
 
 		try {
 			if (!keys1.areCompatible(keys2)) {
@@ -203,6 +247,7 @@ public abstract class JoinOperator<I1, I2, OUT> extends TwoInputUdfOperator<I1, 
 		return customPartitioner;
 	}
 
+	public String getLocation(){return location;}
 	// --------------------------------------------------------------------------------------------
 	// special join types
 	// --------------------------------------------------------------------------------------------
@@ -231,6 +276,8 @@ public abstract class JoinOperator<I1, I2, OUT> extends TwoInputUdfOperator<I1, 
 
 		private final String joinLocationName;
 
+		protected String location = super.location;
+
 		public EquiJoin(DataSet<I1> input1, DataSet<I2> input2,
 				Keys<I1> keys1, Keys<I2> keys2, FlatJoinFunction<I1, I2, OUT> function,
 				TypeInformation<OUT> returnType, JoinHint hint, String joinLocationName) {
@@ -257,11 +304,40 @@ public abstract class JoinOperator<I1, I2, OUT> extends TwoInputUdfOperator<I1, 
 		}
 
 		public EquiJoin(DataSet<I1> input1, DataSet<I2> input2,
+						Keys<I1> keys1, Keys<I2> keys2, FlatJoinFunction<I1, I2, OUT> function,
+						TypeInformation<OUT> returnType, JoinHint hint, String joinLocationName, JoinType type, String location) {
+			super(input1, input2, keys1, keys2, returnType, hint, type, location);
+
+			if (function == null) {
+				throw new NullPointerException();
+			}
+
+			this.function = function;
+			this.joinLocationName = joinLocationName;
+			this.location = location;
+		}
+
+		public EquiJoin(DataSet<I1> input1, DataSet<I2> input2,
 				Keys<I1> keys1, Keys<I2> keys2, FlatJoinFunction<I1, I2, OUT> generatedFunction, JoinFunction<I1, I2, OUT> function,
 				TypeInformation<OUT> returnType, JoinHint hint, String joinLocationName, JoinType type) {
 			super(input1, input2, keys1, keys2, returnType, hint, type);
 
 			this.joinLocationName = joinLocationName;
+
+			if (function == null) {
+				throw new NullPointerException();
+			}
+
+			this.function = generatedFunction;
+		}
+
+		public EquiJoin(DataSet<I1> input1, DataSet<I2> input2,
+						Keys<I1> keys1, Keys<I2> keys2, FlatJoinFunction<I1, I2, OUT> generatedFunction, JoinFunction<I1, I2, OUT> function,
+						TypeInformation<OUT> returnType, JoinHint hint, String joinLocationName, JoinType type, String location) {
+			super(input1, input2, keys1, keys2, returnType, hint, type, location);
+
+			this.joinLocationName = joinLocationName;
+			this.location = location;
 
 			if (function == null) {
 				throw new NullPointerException();
@@ -336,7 +412,8 @@ public abstract class JoinOperator<I1, I2, OUT> extends TwoInputUdfOperator<I1, 
 					.withParallelism(getParallelism())
 					.withPartitioner(getPartitioner())
 					.withJoinHint(getJoinHint())
-					.withResultType(getResultType());
+					.withResultType(getResultType())
+					.withLocation(this.location);
 
 			final boolean requiresTupleUnwrapping = keys1 instanceof SelectorFunctionKeys || keys2 instanceof SelectorFunctionKeys;
 			if (requiresTupleUnwrapping) {
@@ -407,6 +484,7 @@ public abstract class JoinOperator<I1, I2, OUT> extends TwoInputUdfOperator<I1, 
 
 			private Partitioner<?> partitioner;
 			private JoinHint joinHint;
+			private String location;
 
 			public JoinOperatorBaseBuilder(String name, JoinType joinType) {
 				this.name = name;
@@ -481,6 +559,10 @@ public abstract class JoinOperator<I1, I2, OUT> extends TwoInputUdfOperator<I1, 
 				this.resultType = resultType;
 				return this;
 			}
+			public JoinOperatorBaseBuilder<OUT> withLocation(String location) {
+				this.location = location;
+				return this;
+			}
 
 			@SuppressWarnings("unchecked")
 			public JoinOperatorBase<?, ?, OUT, ?> build() {
@@ -496,10 +578,10 @@ public abstract class JoinOperator<I1, I2, OUT> extends TwoInputUdfOperator<I1, 
 				} else {
 					operator = new InnerJoinOperatorBase<>(
 							udf,
-							new BinaryOperatorInformation(input1Type, input2Type, resultType),
+							new BinaryOperatorInformation(input1Type, input2Type, resultType, location),
 							this.keys1.computeLogicalKeyPositions(),
 							this.keys2.computeLogicalKeyPositions(),
-							this.name);
+							this.name, this.location);
 				}
 
 				operator.setFirstInput(input1);
@@ -507,6 +589,7 @@ public abstract class JoinOperator<I1, I2, OUT> extends TwoInputUdfOperator<I1, 
 				operator.setParallelism(parallelism);
 				operator.setCustomPartitioner(partitioner);
 				operator.setJoinHint(joinHint);
+				operator.setLocation(this.location);
 				return operator;
 			}
 
@@ -546,6 +629,13 @@ public abstract class JoinOperator<I1, I2, OUT> extends TwoInputUdfOperator<I1, 
 				new TupleTypeInfo<Tuple2<I1, I2>>(input1.getType(), input2.getType()), hint, joinLocationName, type);
 		}
 
+		public DefaultJoin(DataSet<I1> input1, DataSet<I2> input2,
+						   Keys<I1> keys1, Keys<I2> keys2, JoinHint hint, String joinLocationName, JoinType type, String location) {
+			super(input1, input2, keys1, keys2,
+				new DefaultFlatJoinFunction<I1, I2>(),
+				new TupleTypeInfo<Tuple2<I1, I2>>(input1.getType(), input2.getType()), hint, joinLocationName, type, location);
+		}
+
 		/**
 		 * Finalizes a Join transformation by applying a {@link org.apache.flink.api.common.functions.RichFlatJoinFunction} to each pair of joined elements.
 		 *
@@ -566,6 +656,14 @@ public abstract class JoinOperator<I1, I2, OUT> extends TwoInputUdfOperator<I1, 
 			return new EquiJoin<>(getInput1(), getInput2(), getKeys1(), getKeys2(), clean(function), returnType, getJoinHint(), Utils.getCallLocationName(), joinType);
 		}
 
+		public <R> EquiJoin<I1, I2, R> with(FlatJoinFunction<I1, I2, R> function, String location) {
+			if (function == null) {
+				throw new NullPointerException("Join function must not be null.");
+			}
+			TypeInformation<R> returnType = TypeExtractor.getFlatJoinReturnTypes(function, getInput1Type(), getInput2Type(), Utils.getCallLocationName(), true);
+			return new EquiJoin<>(getInput1(), getInput2(), getKeys1(), getKeys2(), clean(function), returnType, getJoinHint(), Utils.getCallLocationName(), joinType, location);
+		}
+
 		public <R> EquiJoin<I1, I2, R> with(JoinFunction<I1, I2, R> function) {
 			if (function == null) {
 				throw new NullPointerException("Join function must not be null.");
@@ -573,6 +671,15 @@ public abstract class JoinOperator<I1, I2, OUT> extends TwoInputUdfOperator<I1, 
 			FlatJoinFunction<I1, I2, R> generatedFunction = new WrappingFlatJoinFunction<>(clean(function));
 			TypeInformation<R> returnType = TypeExtractor.getJoinReturnTypes(function, getInput1Type(), getInput2Type(), Utils.getCallLocationName(), true);
 			return new EquiJoin<>(getInput1(), getInput2(), getKeys1(), getKeys2(), generatedFunction, function, returnType, getJoinHint(), Utils.getCallLocationName(), joinType);
+		}
+
+		public <R> EquiJoin<I1, I2, R> with(JoinFunction<I1, I2, R> function, String location) {
+			if (function == null) {
+				throw new NullPointerException("Join function must not be null.");
+			}
+			FlatJoinFunction<I1, I2, R> generatedFunction = new WrappingFlatJoinFunction<>(clean(function));
+			TypeInformation<R> returnType = TypeExtractor.getJoinReturnTypes(function, getInput1Type(), getInput2Type(), Utils.getCallLocationName(), true);
+			return new EquiJoin<>(getInput1(), getInput2(), getKeys1(), getKeys2(), generatedFunction, function, returnType, getJoinHint(), Utils.getCallLocationName(), joinType, location);
 		}
 
 		/**
@@ -878,6 +985,9 @@ public abstract class JoinOperator<I1, I2, OUT> extends TwoInputUdfOperator<I1, 
 
 		public JoinOperatorSets(DataSet<I1> input1, DataSet<I2> input2) {
 			super(input1, input2);
+		}
+		public JoinOperatorSets(DataSet<I1> input1, DataSet<I2> input2, String location) {
+			super(input1, input2, location);
 		}
 
 		public JoinOperatorSets(DataSet<I1> input1, DataSet<I2> input2, JoinHint hint) {

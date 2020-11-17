@@ -64,7 +64,7 @@ public abstract class DualInputOperator<IN1, IN2, OUT, FT extends Function> exte
 	 */
 	private DualInputSemanticProperties semanticProperties = new DualInputSemanticProperties();
 
-	protected String location;
+	protected String location="dualinputop";
 	
 	// --------------------------------------------------------------------------------------------
 	
@@ -98,6 +98,13 @@ public abstract class DualInputOperator<IN1, IN2, OUT, FT extends Function> exte
 		super(stub, operatorInfo, name);
 		this.keyFields1 = keyPositions1;
 		this.keyFields2 = keyPositions2;
+	}
+
+	protected DualInputOperator(UserCodeWrapper<FT> stub, BinaryOperatorInformation<IN1, IN2, OUT> operatorInfo, int[] keyPositions1, int[] keyPositions2, String name, String location) {
+		super(stub, operatorInfo, name, location);
+		this.keyFields1 = keyPositions1;
+		this.keyFields2 = keyPositions2;
+		this.location = location;
 	}
 
 	// --------------------------------------------------------------------------------------------

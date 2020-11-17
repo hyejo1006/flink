@@ -126,6 +126,8 @@ public class ExecutionJobVertex implements AccessExecutionJobVertex, Archiveable
 
 	private final ResourceProfile resourceProfile;
 
+	private String location="executionJobVertexLocation";
+
 	/**
 	 * Either store a serialized task information, which is for all sub tasks the same,
 	 * or the permanent blob key of the offloaded task information BLOB containing
@@ -170,6 +172,7 @@ public class ExecutionJobVertex implements AccessExecutionJobVertex, Archiveable
 
 		this.graph = graph;
 		this.jobVertex = jobVertex;
+		this.location = jobVertex.getLocation();
 
 		int vertexParallelism = jobVertex.getParallelism();
 		int numTaskVertices = vertexParallelism > 0 ? vertexParallelism : defaultParallelism;
@@ -318,6 +321,8 @@ public class ExecutionJobVertex implements AccessExecutionJobVertex, Archiveable
 	public JobVertex getJobVertex() {
 		return jobVertex;
 	}
+
+	public String getLocation() { return location;}
 
 	@Override
 	public String getName() {

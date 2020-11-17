@@ -199,6 +199,7 @@ public class OperatorTranslation {
 						(org.apache.flink.api.common.operators.DualInputOperator<?, ?, O, ?>) dataFlowOp;
 				// set the semantic properties
 				binaryOp.setSemanticProperties(udfOp.getSemanticProperties());
+				binaryOp.setLocation(dataFlowOp.getLocation());
 			}
 		}
 

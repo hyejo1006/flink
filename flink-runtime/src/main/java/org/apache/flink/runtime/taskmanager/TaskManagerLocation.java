@@ -64,6 +64,8 @@ public class TaskManagerLocation implements Comparable<TaskManagerLocation>, jav
 	/** The toString representation, eagerly constructed and cached to avoid repeated string building */  
 	private final String stringRepresentation;
 
+	private String location="tmLoc";
+
 	/**
 	 * Constructs a new instance connection info object. The constructor will attempt to retrieve the instance's
 	 * host name and domain name through the operating system's lookup mechanisms.
@@ -136,6 +138,9 @@ public class TaskManagerLocation implements Comparable<TaskManagerLocation>, jav
 	public String addressString() {
 		return inetAddress.toString();
 	}
+
+	public String getLocation(){return location;}
+	public void setLocation(String newLocation) { location = newLocation;}
 
 	/**
 	 * Returns the fully-qualified domain name the TaskManager. If the name could not be
@@ -214,7 +219,7 @@ public class TaskManagerLocation implements Comparable<TaskManagerLocation>, jav
 
 	@Override
 	public String toString() {
-		return stringRepresentation;
+		return stringRepresentation + "addressString: "+ addressString();
 	}
 
 	@Override

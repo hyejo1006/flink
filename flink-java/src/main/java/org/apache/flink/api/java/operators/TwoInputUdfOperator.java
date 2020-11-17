@@ -78,6 +78,10 @@ public abstract class TwoInputUdfOperator<IN1, IN2, OUT, O extends TwoInputUdfOp
 		super(input1, input2, resultType);
 	}
 
+	protected TwoInputUdfOperator(DataSet<IN1> input1, DataSet<IN2> input2, TypeInformation<OUT> resultType, String location) {
+		super(input1, input2, resultType, location);
+	}
+
 	protected abstract Function getFunction();
 
 	// --------------------------------------------------------------------------------------------

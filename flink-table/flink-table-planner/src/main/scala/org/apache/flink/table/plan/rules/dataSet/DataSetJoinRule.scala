@@ -64,7 +64,8 @@ class DataSetJoinRule
       joinInfo.pairs.toList,
       join.getJoinType,
       null,
-      description)
+      description,
+    "address")
   }
 
 }

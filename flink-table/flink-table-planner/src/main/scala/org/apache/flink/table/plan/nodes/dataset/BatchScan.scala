@@ -68,7 +68,7 @@ trait BatchScan extends CommonScan[Row] with DataSetRel {
 
       val opName = s"from: (${schema.fieldNames.mkString(", ")})"
 
-      input.map(runner).name(opName)
+      input.map(runner, batchscanAddress).name(opName)
     }
     // no conversion necessary, forward
     else {

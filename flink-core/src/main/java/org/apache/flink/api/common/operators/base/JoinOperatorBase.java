@@ -86,6 +86,10 @@ public abstract class JoinOperatorBase<IN1, IN2, OUT, FT extends FlatJoinFunctio
 		super(udf, operatorInfo, keyPositions1, keyPositions2, name);
 	}
 
+	public JoinOperatorBase(UserCodeWrapper<FT> udf, BinaryOperatorInformation<IN1, IN2, OUT> operatorInfo, int[] keyPositions1, int[] keyPositions2, String name, String location) {
+		super(udf, operatorInfo, keyPositions1, keyPositions2, name, location);
+	}
+
 	public JoinOperatorBase(FT udf, BinaryOperatorInformation<IN1, IN2, OUT> operatorInfo, int[] keyPositions1, int[] keyPositions2, String name) {
 		super(new UserCodeObjectWrapper<>(udf), operatorInfo, keyPositions1, keyPositions2, name);
 	}

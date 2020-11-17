@@ -52,12 +52,22 @@ public class JoinOperatorSetsBase<I1, I2> {
 	protected final JoinHint joinHint;
 	protected final JoinType joinType;
 
+	protected String location = "joinoperatorsetbase";
+
 	public JoinOperatorSetsBase(DataSet<I1> input1, DataSet<I2> input2) {
 		this(input1, input2, JoinHint.OPTIMIZER_CHOOSES);
 	}
 
+	public JoinOperatorSetsBase(DataSet<I1> input1, DataSet<I2> input2, String location) {
+		this(input1, input2, JoinHint.OPTIMIZER_CHOOSES, location);
+	}
+
 	public JoinOperatorSetsBase(DataSet<I1> input1, DataSet<I2> input2, JoinHint hint) {
 		this(input1, input2, hint, JoinType.INNER);
+	}
+
+	public JoinOperatorSetsBase(DataSet<I1> input1, DataSet<I2> input2, JoinHint hint, String location) {
+		this(input1, input2, hint, JoinType.INNER, location);
 	}
 
 	public JoinOperatorSetsBase(DataSet<I1> input1, DataSet<I2> input2, JoinHint hint, JoinType type) {
@@ -69,6 +79,18 @@ public class JoinOperatorSetsBase<I1, I2> {
 		this.input2 = input2;
 		this.joinHint = hint;
 		this.joinType = type;
+	}
+
+	public JoinOperatorSetsBase(DataSet<I1> input1, DataSet<I2> input2, JoinHint hint, JoinType type, String location) {
+		if (input1 == null || input2 == null) {
+			throw new NullPointerException();
+		}
+
+		this.input1 = input1;
+		this.input2 = input2;
+		this.joinHint = hint;
+		this.joinType = type;
+		this.location = location;
 	}
 
 	/**
@@ -88,7 +110,7 @@ public class JoinOperatorSetsBase<I1, I2> {
 	 * @see DataSet
 	 */
 	public JoinOperatorSetsPredicateBase where(int... fields) {
-		return new JoinOperatorSetsPredicateBase(new Keys.ExpressionKeys<>(fields, input1.getType()));
+		return new JoinOperatorSetsPredicateBase(new Keys.ExpressionKeys<>(fields, input1.getType()), location);
 	}
 
 	/**
@@ -107,7 +129,7 @@ public class JoinOperatorSetsBase<I1, I2> {
 	 * @see DataSet
 	 */
 	public JoinOperatorSetsPredicateBase where(String... fields) {
-		return new JoinOperatorSetsPredicateBase(new Keys.ExpressionKeys<>(fields, input1.getType()));
+		return new JoinOperatorSetsPredicateBase(new Keys.ExpressionKeys<>(fields, input1.getType()), location);
 	}
 
 	/**
@@ -127,7 +149,7 @@ public class JoinOperatorSetsBase<I1, I2> {
 	 */
 	public <K> JoinOperatorSetsPredicateBase where(KeySelector<I1, K> keySelector) {
 		TypeInformation<K> keyType = TypeExtractor.getKeySelectorTypes(keySelector, input1.getType());
-		return new JoinOperatorSetsPredicateBase(new Keys.SelectorFunctionKeys<>(keySelector, input1.getType(), keyType));
+		return new JoinOperatorSetsPredicateBase(new Keys.SelectorFunctionKeys<>(keySelector, input1.getType(), keyType), location);
 	}
 
 	/**
@@ -141,6 +163,7 @@ public class JoinOperatorSetsBase<I1, I2> {
 	public class JoinOperatorSetsPredicateBase {
 
 		protected final Keys<I1> keys1;
+		protected String location = "jointemp";
 
 		protected JoinOperatorSetsPredicateBase(Keys<I1> keys1) {
 			if (keys1 == null) {
@@ -152,6 +175,18 @@ public class JoinOperatorSetsBase<I1, I2> {
 			}
 
 			this.keys1 = keys1;
+		}
+		protected JoinOperatorSetsPredicateBase(Keys<I1> keys1, String location) {
+			if (keys1 == null) {
+				throw new NullPointerException();
+			}
+
+			if (keys1.isEmpty()) {
+				throw new InvalidProgramException("The join keys must not be empty.");
+			}
+
+			this.keys1 = keys1;
+			this.location = location;
 		}
 
 		/**
@@ -167,7 +202,7 @@ public class JoinOperatorSetsBase<I1, I2> {
 		 * @return A JoinFunctionAssigner.
 		 */
 		public JoinFunctionAssigner<I1, I2> equalTo(int... fields) {
-			return createJoinFunctionAssigner(new Keys.ExpressionKeys<>(fields, input2.getType()));
+			return createJoinFunctionAssigner(new Keys.ExpressionKeys<>(fields, input2.getType()), location);
 		}
 
 		/**
@@ -181,7 +216,7 @@ public class JoinOperatorSetsBase<I1, I2> {
 		 * @return A JoinFunctionAssigner.
 		 */
 		public JoinFunctionAssigner<I1, I2> equalTo(String... fields) {
-			return createJoinFunctionAssigner(new Keys.ExpressionKeys<>(fields, input2.getType()));
+			return createJoinFunctionAssigner(new Keys.ExpressionKeys<>(fields, input2.getType()), location);
 		}
 
 		/**
@@ -198,12 +233,17 @@ public class JoinOperatorSetsBase<I1, I2> {
 		 */
 		public <K> JoinFunctionAssigner<I1, I2> equalTo(KeySelector<I2, K> keySelector) {
 			TypeInformation<K> keyType = TypeExtractor.getKeySelectorTypes(keySelector, input2.getType());
-			return createJoinFunctionAssigner(new Keys.SelectorFunctionKeys<>(keySelector, input2.getType(), keyType));
+			return createJoinFunctionAssigner(new Keys.SelectorFunctionKeys<>(keySelector, input2.getType(), keyType), location);
 		}
 
 		protected JoinFunctionAssigner<I1, I2> createJoinFunctionAssigner(Keys<I2> keys2) {
 			DefaultJoin<I1, I2> join = createDefaultJoin(keys2);
 			return new DefaultJoinFunctionAssigner(join);
+		}
+
+		protected JoinFunctionAssigner<I1, I2> createJoinFunctionAssigner(Keys<I2> keys2, String location) {
+			DefaultJoin<I1, I2> join = createDefaultJoin(keys2, location);
+			return new DefaultJoinFunctionAssigner(join, location);
 		}
 
 		protected DefaultJoin<I1, I2> createDefaultJoin(Keys<I2> keys2) {
@@ -223,20 +263,42 @@ public class JoinOperatorSetsBase<I1, I2> {
 			return new DefaultJoin<>(input1, input2, keys1, keys2, joinHint, Utils.getCallLocationName(4), joinType);
 		}
 
+		protected DefaultJoin<I1, I2> createDefaultJoin(Keys<I2> keys2, String location) {
+			if (keys2 == null) {
+				throw new NullPointerException("The join keys may not be null.");
+			}
+
+			if (keys2.isEmpty()) {
+				throw new InvalidProgramException("The join keys may not be empty.");
+			}
+
+			try {
+				keys1.areCompatible(keys2);
+			} catch (Keys.IncompatibleKeysException e) {
+				throw new InvalidProgramException("The pair of join keys are not compatible with each other.", e);
+			}
+			return new DefaultJoin<>(input1, input2, keys1, keys2, joinHint, Utils.getCallLocationName(4), joinType, location);
+		}
+
 		private class DefaultJoinFunctionAssigner implements JoinFunctionAssigner<I1, I2> {
 
 			private final DefaultJoin<I1, I2> defaultJoin;
+			protected String location = "defaultjoinfunctionassigner";
 
 			public DefaultJoinFunctionAssigner(DefaultJoin<I1, I2> defaultJoin) {
 				this.defaultJoin = defaultJoin;
 			}
+			public DefaultJoinFunctionAssigner(DefaultJoin<I1, I2> defaultJoin, String location) {
+				this.defaultJoin = defaultJoin;
+				this.location = location;
+			}
 
 			public <R> EquiJoin<I1, I2, R> with(JoinFunction<I1, I2, R> joinFunction) {
-				return defaultJoin.with(joinFunction);
+				return defaultJoin.with(joinFunction, location);
 			}
 
 			public <R> EquiJoin<I1, I2, R> with(FlatJoinFunction<I1, I2, R> joinFunction) {
-				return defaultJoin.with(joinFunction);
+				return defaultJoin.with(joinFunction, location);
 			}
 		}
 

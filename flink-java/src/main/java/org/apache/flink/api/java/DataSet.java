@@ -789,6 +789,9 @@ public abstract class DataSet<T> {
 	public <R> JoinOperatorSets<T, R> join(DataSet<R> other) {
 		return new JoinOperatorSets<>(this, other);
 	}
+	public <R> JoinOperatorSets<T, R> join(DataSet<R> other, String location) {
+		return new JoinOperatorSets<>(this, other, location);
+	}
 
 	/**
 	 * Initiates a Join transformation.
@@ -912,6 +915,19 @@ public abstract class DataSet<T> {
 		}
 
 	}
+	public <R> JoinOperatorSetsBase<T, R> leftOuterJoin(DataSet<R> other, JoinHint strategy, String location) {
+		switch(strategy) {
+			case OPTIMIZER_CHOOSES:
+			case REPARTITION_SORT_MERGE:
+			case REPARTITION_HASH_FIRST:
+			case REPARTITION_HASH_SECOND:
+			case BROADCAST_HASH_SECOND:
+				return new JoinOperatorSetsBase<>(this, other, strategy, JoinType.LEFT_OUTER, location);
+			default:
+				throw new InvalidProgramException("Invalid JoinHint for LeftOuterJoin: " + strategy);
+		}
+
+	}
 
 	/**
 	 * Initiates a Right Outer Join transformation.
@@ -966,6 +982,19 @@ public abstract class DataSet<T> {
 		}
 	}
 
+	public <R> JoinOperatorSetsBase<T, R> rightOuterJoin(DataSet<R> other, JoinHint strategy, String location) {
+		switch(strategy) {
+			case OPTIMIZER_CHOOSES:
+			case REPARTITION_SORT_MERGE:
+			case REPARTITION_HASH_FIRST:
+			case REPARTITION_HASH_SECOND:
+			case BROADCAST_HASH_FIRST:
+				return new JoinOperatorSetsBase<>(this, other, strategy, JoinType.RIGHT_OUTER, location);
+			default:
+				throw new InvalidProgramException("Invalid JoinHint for RightOuterJoin: " + strategy);
+		}
+	}
+
 	/**
 	 * Initiates a Full Outer Join transformation.
 	 *
@@ -1013,6 +1042,18 @@ public abstract class DataSet<T> {
 			case REPARTITION_HASH_FIRST:
 			case REPARTITION_HASH_SECOND:
 				return new JoinOperatorSetsBase<>(this, other, strategy, JoinType.FULL_OUTER);
+			default:
+				throw new InvalidProgramException("Invalid JoinHint for FullOuterJoin: " + strategy);
+		}
+	}
+
+	public <R> JoinOperatorSetsBase<T, R> fullOuterJoin(DataSet<R> other, JoinHint strategy, String location) {
+		switch(strategy) {
+			case OPTIMIZER_CHOOSES:
+			case REPARTITION_SORT_MERGE:
+			case REPARTITION_HASH_FIRST:
+			case REPARTITION_HASH_SECOND:
+				return new JoinOperatorSetsBase<>(this, other, strategy, JoinType.FULL_OUTER, location);
 			default:
 				throw new InvalidProgramException("Invalid JoinHint for FullOuterJoin: " + strategy);
 		}

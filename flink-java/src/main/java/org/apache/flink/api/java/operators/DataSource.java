@@ -48,6 +48,8 @@ public class DataSource<OUT> extends Operator<OUT, DataSource<OUT>> {
 
 	private SplitDataProperties<OUT> splitDataProperties;
 
+	protected String location = "datasource";
+
 	// --------------------------------------------------------------------------------------------
 
 	/**
@@ -58,7 +60,7 @@ public class DataSource<OUT> extends Operator<OUT, DataSource<OUT>> {
 	 * @param type The type of the elements produced by this input format.
 	 */
 	public DataSource(ExecutionEnvironment context, InputFormat<OUT, ?> inputFormat, TypeInformation<OUT> type, String dataSourceLocationName) {
-		super(context, type, dataSourceLocationName);
+		super(context, type);
 
 		this.dataSourceLocationName = dataSourceLocationName;
 
@@ -73,6 +75,22 @@ public class DataSource<OUT> extends Operator<OUT, DataSource<OUT>> {
 		}
 	}
 
+	public DataSource(ExecutionEnvironment context, InputFormat<OUT, ?> inputFormat, TypeInformation<OUT> type, String dataSourceLocationName, String location) {
+		super(context, type, location);
+
+		this.dataSourceLocationName = dataSourceLocationName;
+		this.location = location;
+
+		if (inputFormat == null) {
+			throw new IllegalArgumentException("The input format may not be null.");
+		}
+
+		this.inputFormat = inputFormat;
+
+		if (inputFormat instanceof NonParallelInput) {
+			this.parallelism = 1;
+		}
+	}
 	/**
 	 * Gets the input format that is executed by this data source.
 	 *
@@ -131,7 +149,7 @@ public class DataSource<OUT> extends Operator<OUT, DataSource<OUT>> {
 
 		@SuppressWarnings({"unchecked", "rawtypes"})
 		GenericDataSourceBase<OUT, ?> source = new GenericDataSourceBase(this.inputFormat,
-			new OperatorInformation<OUT>(getType()), name, dataSourceLocationName);
+			new OperatorInformation<OUT>(getType()), name, location);
 		source.setParallelism(parallelism);
 		if (this.parameters != null) {
 			source.getParameters().addAll(this.parameters);

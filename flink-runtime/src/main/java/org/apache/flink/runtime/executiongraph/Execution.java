@@ -310,6 +310,8 @@ public class Execution implements AccessExecution, Archiveable<ArchivedExecution
 				if (logicalSlot.tryAssignPayload(this)) {
 					// check for concurrent modification (e.g. cancelling call)
 					if ((state == SCHEDULED || state == CREATED) && !taskManagerLocationFuture.isDone()) {
+						logicalSlot.getTaskManagerLocation().setLocation(vertex.getLocation());
+						System.out.println("execution.tryAssignResource: "+logicalSlot.getTaskManagerLocation().getLocation());
 						taskManagerLocationFuture.complete(logicalSlot.getTaskManagerLocation());
 						assignedAllocationID = logicalSlot.getAllocationId();
 						return true;
@@ -342,6 +344,8 @@ public class Execution implements AccessExecution, Archiveable<ArchivedExecution
 	public TaskManagerLocation getAssignedResourceLocation() {
 		// returns non-null only when a location is already assigned
 		final LogicalSlot currentAssignedResource = assignedResource;
+		if(currentAssignedResource != null)
+			currentAssignedResource.getTaskManagerLocation().setLocation(vertex.getLocation());
 		return currentAssignedResource != null ? currentAssignedResource.getTaskManagerLocation() : null;
 	}
 
@@ -435,6 +439,7 @@ public class Execution implements AccessExecution, Archiveable<ArchivedExecution
 			LocationPreferenceConstraint locationPreferenceConstraint,
 			@Nonnull Set<AllocationID> allPreviousExecutionGraphAllocationIds) {
 
+		System.out.println("Execution.scheduleForExecution\n");
 		assertRunningInJobMasterMainThread();
 		try {
 			final CompletableFuture<Execution> allocationFuture = allocateResourcesForExecution(
@@ -617,6 +622,7 @@ public class Execution implements AccessExecution, Archiveable<ArchivedExecution
 			ExecutionVertex vertex,
 			TaskManagerLocation location,
 			ExecutionAttemptID attemptId) {
+		location.setLocation(vertex.getLocation());
 		ProducerDescriptor producerDescriptor = ProducerDescriptor.create(location, attemptId);
 
 		boolean lazyScheduling = vertex.getExecutionGraph().getScheduleMode().allowLazyDeployment();
@@ -667,6 +673,7 @@ public class Execution implements AccessExecution, Archiveable<ArchivedExecution
 	 *
 	 * @throws JobException if the execution cannot be deployed to the assigned resource
 	 */
+	//////
 	public void deploy() throws JobException {
 		assertRunningInJobMasterMainThread();
 
@@ -1403,6 +1410,7 @@ public class Execution implements AccessExecution, Archiveable<ArchivedExecution
 		if (slot != null) {
 			final TaskManagerGateway taskManagerGateway = slot.getTaskManagerGateway();
 			final TaskManagerLocation taskManagerLocation = slot.getTaskManagerLocation();
+			taskManagerLocation.setLocation(vertex.getLocation());
 
 			CompletableFuture<Acknowledge> updatePartitionsResultFuture = taskManagerGateway.updatePartitions(attemptId, partitionInfos, rpcTimeout);
 
@@ -1479,6 +1487,7 @@ public class Execution implements AccessExecution, Archiveable<ArchivedExecution
 							throw new FlinkRuntimeException("TaskManagerLocationFuture was completed with null. This indicates a programming bug.");
 						}
 
+						taskManagerLocation.setLocation(vertex.getLocation());
 						completedTaskManagerLocations.add(taskManagerLocation);
 					}
 				}

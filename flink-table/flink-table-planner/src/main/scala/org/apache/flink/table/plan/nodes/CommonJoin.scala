@@ -81,4 +81,18 @@ trait CommonJoin {
       .item("join", joinSelectionToString(inputType))
       .item("joinType", joinTypeToString(joinType))
   }
+
+  private[flink] def joinExplainTerms(
+      pw: RelWriter,
+      inputType: RelDataType,
+      joinCondition: RexNode,
+      joinType: JoinRelType,
+      expression: (RexNode, List[String], Option[List[RexNode]]) => String,
+      location: String): RelWriter = {
+
+    pw.item("where", joinConditionToString(inputType, joinCondition, expression))
+      .item("join", joinSelectionToString(inputType))
+      .item("joinType", joinTypeToString(joinType))
+      .item("location", location)
+  }
 }

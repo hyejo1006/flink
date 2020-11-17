@@ -117,7 +117,7 @@ public class JobVertex implements java.io.Serializable {
 	/** The input dependency constraint to schedule this vertex. */
 	private InputDependencyConstraint inputDependencyConstraint = InputDependencyConstraint.ANY;
 
-	protected String location="jobvertex";
+	protected String location;
 
 	// --------------------------------------------------------------------------------------------
 

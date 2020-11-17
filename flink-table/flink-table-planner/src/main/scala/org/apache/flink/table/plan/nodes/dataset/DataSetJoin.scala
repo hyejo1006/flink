@@ -61,10 +61,13 @@ class DataSetJoin(
     keyPairs: List[IntPair],
     joinType: JoinRelType,
     joinHint: JoinHint,
-    ruleDescription: String)
+    ruleDescription: String,
+    address: String)
   extends BiRel(cluster, traitSet, leftNode, rightNode)
   with CommonJoin
   with DataSetRel {
+
+  var testaddress = "joinaddress"
 
   override def deriveRowType(): RelDataType = rowRelDataType
 
@@ -81,7 +84,8 @@ class DataSetJoin(
       keyPairs,
       joinType,
       joinHint,
-      ruleDescription)
+      ruleDescription,
+      testaddress)
   }
 
   override def toString: String = {
@@ -98,7 +102,8 @@ class DataSetJoin(
       joinRowType,
       joinCondition,
       joinType,
-      getExpressionString)
+      getExpressionString,
+      testaddress)
   }
 
   override def computeSelfCost (planner: RelOptPlanner, metadata: RelMetadataQuery): RelOptCost = {
@@ -174,7 +179,8 @@ class DataSetJoin(
           leftKeys.toArray,
           rightKeys.toArray,
           returnType,
-          config)
+          config,
+          testaddress)
       case JoinRelType.LEFT =>
         addLeftOuterJoin(
           leftDataSet,
@@ -182,7 +188,8 @@ class DataSetJoin(
           leftKeys.toArray,
           rightKeys.toArray,
           returnType,
-          config)
+          config,
+          testaddress)
       case JoinRelType.RIGHT =>
         addRightOuterJoin(
           leftDataSet,
@@ -190,7 +197,8 @@ class DataSetJoin(
           leftKeys.toArray,
           rightKeys.toArray,
           returnType,
-          config)
+          config,
+          testaddress)
       case JoinRelType.FULL =>
         addFullOuterJoin(
           leftDataSet,
@@ -198,7 +206,8 @@ class DataSetJoin(
           leftKeys.toArray,
           rightKeys.toArray,
           returnType,
-          config)
+          config,
+          testaddress)
       case _ => throw new TableException(s"$joinType is not supported.")
     }
   }
@@ -209,8 +218,10 @@ class DataSetJoin(
       leftKeys: Array[Int],
       rightKeys: Array[Int],
       resultType: TypeInformation[Row],
-      config: TableConfig): DataSet[Row] = {
+      config: TableConfig,
+      address: String): DataSet[Row] = {
 
+    val joinaddress=address
     val generator = new FunctionCodeGenerator(
       config,
       false,
@@ -241,7 +252,7 @@ class DataSetJoin(
       genFunction.code,
       genFunction.returnType)
 
-    left.join(right)
+    left.join(right, joinaddress)
       .where(leftKeys: _*)
       .equalTo(rightKeys: _*)
       .`with`(joinFun)
@@ -254,7 +265,10 @@ class DataSetJoin(
       leftKeys: Array[Int],
       rightKeys: Array[Int],
       resultType: TypeInformation[Row],
-      config: TableConfig): DataSet[Row] = {
+      config: TableConfig,
+      address: String): DataSet[Row] = {
+
+    val joinaddress=address
 
     if (!config.getNullCheck) {
       throw new TableException("Null check in TableConfig must be enabled for outer joins.")
@@ -281,7 +295,7 @@ class DataSetJoin(
 
     // join left and right inputs, evaluate join predicate, and emit join pairs
     val nestedLeftKeys = leftKeys.map(i => s"f0.f$i")
-    val joinPairs = foldedRowsLeft.leftOuterJoin(right, JoinHint.REPARTITION_SORT_MERGE)
+    val joinPairs = foldedRowsLeft.leftOuterJoin(right, JoinHint.REPARTITION_SORT_MERGE, joinaddress)
       .where(nestedLeftKeys: _*)
       .equalTo(rightKeys: _*)
       .`with`(joinFun)
@@ -310,8 +324,10 @@ class DataSetJoin(
       leftKeys: Array[Int],
       rightKeys: Array[Int],
       resultType: TypeInformation[Row],
-      config: TableConfig): DataSet[Row] = {
+      config: TableConfig,
+      address: String): DataSet[Row] = {
 
+    val joinaddress=address
     if (!config.getNullCheck) {
       throw new TableException("Null check in TableConfig must be enabled for outer joins.")
     }
@@ -337,7 +353,7 @@ class DataSetJoin(
 
     // join left and right inputs, evaluate join predicate, and emit join pairs
     val nestedRightKeys = rightKeys.map(i => s"f0.f$i")
-    val joinPairs = left.rightOuterJoin(foldedRowsRight, JoinHint.REPARTITION_SORT_MERGE)
+    val joinPairs = left.rightOuterJoin(foldedRowsRight, JoinHint.REPARTITION_SORT_MERGE, joinaddress)
       .where(leftKeys: _*)
       .equalTo(nestedRightKeys: _*)
       .`with`(joinFun)
@@ -366,8 +382,10 @@ class DataSetJoin(
       leftKeys: Array[Int],
       rightKeys: Array[Int],
       resultType: TypeInformation[Row],
-      config: TableConfig): DataSet[Row] = {
+      config: TableConfig,
+      address: String): DataSet[Row] = {
 
+    val joinaddress=address
     if (!config.getNullCheck) {
       throw new TableException("Null check in TableConfig must be enabled for outer joins.")
     }
@@ -397,7 +415,7 @@ class DataSetJoin(
     val nestedLeftKeys = leftKeys.map(i => s"f0.f$i")
     val nestedRightKeys = rightKeys.map(i => s"f0.f$i")
     val joinPairs = foldedRowsLeft
-      .fullOuterJoin(foldedRowsRight, JoinHint.REPARTITION_SORT_MERGE)
+      .fullOuterJoin(foldedRowsRight, JoinHint.REPARTITION_SORT_MERGE, joinaddress)
       .where(nestedLeftKeys: _*)
       .equalTo(nestedRightKeys: _*)
       .`with`(joinFun)
