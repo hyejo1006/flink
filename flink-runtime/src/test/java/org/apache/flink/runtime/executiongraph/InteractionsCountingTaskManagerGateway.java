@@ -27,7 +27,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
-class InteractionsCountingTaskManagerGateway extends SimpleAckingTaskManagerGateway {
+public class InteractionsCountingTaskManagerGateway extends SimpleAckingTaskManagerGateway {
 
 	private final AtomicInteger cancelTaskCount = new AtomicInteger(0);
 

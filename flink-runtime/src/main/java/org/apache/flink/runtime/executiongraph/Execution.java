@@ -310,8 +310,6 @@ public class Execution implements AccessExecution, Archiveable<ArchivedExecution
 				if (logicalSlot.tryAssignPayload(this)) {
 					// check for concurrent modification (e.g. cancelling call)
 					if ((state == SCHEDULED || state == CREATED) && !taskManagerLocationFuture.isDone()) {
-						logicalSlot.getTaskManagerLocation().setLocation(vertex.getLocation());
-						System.out.println("execution.tryAssignResource: "+logicalSlot.getTaskManagerLocation().getLocation());
 						taskManagerLocationFuture.complete(logicalSlot.getTaskManagerLocation());
 						assignedAllocationID = logicalSlot.getAllocationId();
 						return true;
@@ -495,10 +493,10 @@ public class Execution implements AccessExecution, Archiveable<ArchivedExecution
 	 * @return Future which is completed with this execution once the slot has been assigned
 	 * 			or with an exception if an error occurred.
 	 */
-	CompletableFuture<Execution> allocateResourcesForExecution(
-			SlotProviderStrategy slotProviderStrategy,
-			LocationPreferenceConstraint locationPreferenceConstraint,
-			@Nonnull Set<AllocationID> allPreviousExecutionGraphAllocationIds) {
+	public CompletableFuture<Execution> allocateResourcesForExecution(
+		SlotProviderStrategy slotProviderStrategy,
+		LocationPreferenceConstraint locationPreferenceConstraint,
+		@Nonnull Set<AllocationID> allPreviousExecutionGraphAllocationIds) {
 		return allocateAndAssignSlotForExecution(
 			slotProviderStrategy,
 			locationPreferenceConstraint,
@@ -525,8 +523,13 @@ public class Execution implements AccessExecution, Archiveable<ArchivedExecution
 
 		assertRunningInJobMasterMainThread();
 
-		final SlotSharingGroup sharingGroup = vertex.getJobVertex().getSlotSharingGroup();
-		final CoLocationConstraint locationConstraint = vertex.getLocationConstraint();
+		SlotSharingGroup sharingGroup = vertex.getJobVertex().getSlotSharingGroup();
+		CoLocationConstraint locationConstraint = vertex.getLocationConstraint();
+
+		if(locationConstraint != null && locationConstraint.getLocation().getLocation() != vertex.getLocation()) {
+			locationConstraint = null;
+			sharingGroup = null;
+		}
 
 		// sanity check
 		if (locationConstraint != null && sharingGroup == null) {

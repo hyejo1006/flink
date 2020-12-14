@@ -293,7 +293,7 @@ public class ExecutionGraphSchedulingTest extends TestLogger {
 
 		//
 		//  Create the slots, futures, and the slot provider
-
+/***************************************************************************************************/
 		final InteractionsCountingTaskManagerGateway taskManager = createTaskManager();
 		final BlockingQueue<AllocationID> returnedSlots = new ArrayBlockingQueue<>(parallelism);
 		final TestingSlotOwner slotOwner = new TestingSlotOwner();

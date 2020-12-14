@@ -333,16 +333,16 @@ public class ExecutionGraph implements AccessExecutionGraph {
 	 * This constructor is for tests only, because it sets default values for many fields.
 	 */
 	@VisibleForTesting
-	ExecutionGraph(
-			ScheduledExecutorService futureExecutor,
-			Executor ioExecutor,
-			JobID jobId,
-			String jobName,
-			Configuration jobConfig,
-			SerializedValue<ExecutionConfig> serializedConfig,
-			Time timeout,
-			RestartStrategy restartStrategy,
-			SlotProvider slotProvider) throws IOException {
+	public ExecutionGraph(
+		ScheduledExecutorService futureExecutor,
+		Executor ioExecutor,
+		JobID jobId,
+		String jobName,
+		Configuration jobConfig,
+		SerializedValue<ExecutionConfig> serializedConfig,
+		Time timeout,
+		RestartStrategy restartStrategy,
+		SlotProvider slotProvider) throws IOException {
 
 		this(
 			new JobInformation(

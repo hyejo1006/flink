@@ -45,7 +45,7 @@ import static org.apache.flink.util.Preconditions.checkNotNull;
  * A slot provider where one can pre-set the slot futures for tasks based on
  * vertex ID and subtask index.
  */
-class ProgrammedSlotProvider implements Scheduler {
+public class ProgrammedSlotProvider implements Scheduler {
 
 	private final Map<JobVertexID, CompletableFuture<LogicalSlot>[]> slotFutures = new HashMap<>();
 
