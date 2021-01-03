@@ -28,5 +28,6 @@ package org.apache.flink.runtime.jobmanager.scheduler;
  */
 public enum LocationPreferenceConstraint {
 	ALL, // wait for all inputs to have a location assigned
-	ANY // only consider those inputs who already have a location assigned
+	ANY, // only consider those inputs who already have a location assigned
+	PIPELINEBROKEN
 }

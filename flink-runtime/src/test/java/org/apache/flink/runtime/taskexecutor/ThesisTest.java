@@ -31,10 +31,13 @@ import org.apache.flink.runtime.io.network.partition.NoOpPartitionTracker;
 import org.apache.flink.runtime.io.network.partition.ResultPartitionType;
 import org.apache.flink.runtime.jobgraph.*;
 import org.apache.flink.runtime.jobgraph.tasks.AbstractInvokable;
+import org.apache.flink.runtime.jobmanager.scheduler.CoLocationConstraint;
+import org.apache.flink.runtime.jobmanager.scheduler.CoLocationGroup;
 import org.apache.flink.runtime.jobmanager.scheduler.LocationPreferenceConstraint;
 import org.apache.flink.runtime.jobmanager.scheduler.SlotSharingGroup;
 import org.apache.flink.runtime.jobmanager.slots.TestingSlotOwner;
 import org.apache.flink.runtime.jobmaster.LogicalSlot;
+import org.apache.flink.runtime.jobmaster.SlotRequestId;
 import org.apache.flink.runtime.jobmaster.slotpool.SlotProvider;
 import org.apache.flink.runtime.leaderretrieval.SettableLeaderRetrievalService;
 import org.apache.flink.runtime.memory.MemoryManager;
@@ -233,6 +236,11 @@ public class ThesisTest extends TestLogger {
 
 		v4.setSlotSharingGroup(ss);
 		jg.addVertex(v4);
+		CoLocationGroup group = new CoLocationGroup(v1, v2, v4);
+
+		CoLocationConstraint constraint1 = group.getLocationConstraint(0);
+		CoLocationConstraint constraint2 = group.getLocationConstraint(1);
+		CoLocationConstraint constraint3 = group.getLocationConstraint(2);
 
 		//mock TaskManagerLocations and TaskManager
 		ResourceID resourceID1 = new ResourceID("a");
@@ -255,6 +263,18 @@ public class ThesisTest extends TestLogger {
 		TaskManagerLocation two = new TaskManagerLocation(resourceID3, address2, 10871);
 		two.setLocation("Europe");
 
+		SlotRequestId slotRequestId = new SlotRequestId();
+		constraint1.setSlotRequestId(slotRequestId);
+		constraint2.setSlotRequestId(slotRequestId);
+		constraint3.setSlotRequestId(slotRequestId);
+
+		constraint1.lockLocation(two);
+		constraint2.lockLocation(two);
+		constraint3.lockLocation(two);
+
+		v1.updateCoLocationGroup(group);
+		v2.updateCoLocationGroup(group);
+		v4.updateCoLocationGroup(group);
 		TaskSlotTable taskSlotTable1 = new TaskSlotTable(Collections.singleton(ResourceProfile.UNKNOWN), timerService);
 		TaskSlotTable taskSlotTable2 = new TaskSlotTable(Collections.singleton(ResourceProfile.UNKNOWN), timerService);
 
@@ -331,7 +351,7 @@ public class ThesisTest extends TestLogger {
 			futures4[i] = new CompletableFuture<>();
 		}
 
-		ProgrammedSlotProvider slotProvider = new ProgrammedSlotProvider(12);
+		ProgrammedSlotProvider slotProvider = new ProgrammedSlotProvider(3);
 		slotProvider.addSlots(v1.getID(), futures1);
 		slotProvider.addSlots(v2.getID(), futures2);
 		slotProvider.addSlots(v3.getID(), futures3);
@@ -344,18 +364,19 @@ public class ThesisTest extends TestLogger {
 		eg.start(ComponentMainThreadExecutorServiceAdapter.forMainThread());
 		eg.scheduleForExecution();
 
-		ExecutionJobVertex executionJobVertex1 = eg.getJobVertex(v1.getID());
-		ExecutionJobVertex executionJobVertex2 = eg.getJobVertex(v2.getID());
-		ExecutionJobVertex executionJobVertex3 = eg.getJobVertex(v3.getID());
-		ExecutionJobVertex executionJobVertex4 = eg.getJobVertex(v4.getID());
 
-		Execution execution = executionJobVertex1.getTaskVertices()[0].getCurrentExecutionAttempt();
-
-		CompletableFuture<Execution> allocationFuture = execution.allocateResourcesForExecution(
-			eg.getSlotProviderStrategy(),
-			LocationPreferenceConstraint.ALL,
-			Collections.emptySet());
-
+//		ExecutionJobVertex executionJobVertex1 = eg.getJobVertex(v1.getID());
+//		ExecutionJobVertex executionJobVertex2 = eg.getJobVertex(v2.getID());
+//		ExecutionJobVertex executionJobVertex3 = eg.getJobVertex(v3.getID());
+//		ExecutionJobVertex executionJobVertex4 = eg.getJobVertex(v4.getID());
+//
+//		Execution execution = executionJobVertex1.getTaskVertices()[0].getCurrentExecutionAttempt();
+//
+//		CompletableFuture<Execution> allocationFuture = execution.allocateResourcesForExecution(
+//			eg.getSlotProviderStrategy(),
+//			LocationPreferenceConstraint.ALL,
+//			Collections.emptySet());
+//
 
 	}
 

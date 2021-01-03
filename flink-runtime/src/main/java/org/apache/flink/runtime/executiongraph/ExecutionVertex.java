@@ -537,7 +537,6 @@ public class ExecutionVertex implements AccessExecutionVertex, Archiveable<Archi
 			Set<CompletableFuture<TaskManagerLocation>> locations = new HashSet<>(getTotalNumberOfParallelSubtasks());
 			Set<CompletableFuture<TaskManagerLocation>> inputLocations = new HashSet<>(getTotalNumberOfParallelSubtasks());
 
-			System.out.println("ExecutionVertex.getPreferredLocationsBasedOnInputs:");
 			// go over all inputs
 			for (int i = 0; i < inputEdges.length; i++) {
 				inputLocations.clear();
@@ -548,17 +547,18 @@ public class ExecutionVertex implements AccessExecutionVertex, Archiveable<Archi
 						// look-up assigned slot of input source
 						CompletableFuture<TaskManagerLocation> locationFuture = sources[k].getSource().getProducer().getCurrentTaskManagerLocationFuture();
 						// add input location
+						inputLocations.add(locationFuture);
 
-						System.out.println("\nCompletableFuture of sources["+k+"]: "+locationFuture.toString());
-						TaskManagerLocation tmLoc = locationFuture.getNow(null);
-						System.out.println("TaskManagerLocation: "+tmLoc.getLocation());
-						if(!(tmLoc ==null) && this.location==tmLoc.getLocation())
-							inputLocations.add(locationFuture);
+//						//System.out.println("\nCompletableFuture of sources["+k+"]: "+locationFuture.toString());
+//						TaskManagerLocation tmLoc = locationFuture.getNow(null);
+//						//System.out.println("TaskManagerLocation: "+tmLoc.getLocation());
+//						if(!(tmLoc ==null) && this.location==tmLoc.getLocation())
+//							inputLocations.add(locationFuture);
 						// inputs which have too many distinct sources are not considered
 						if (inputLocations.size() > MAX_DISTINCT_LOCATIONS_TO_CONSIDER) {
 							inputLocations.clear();
-							if(!(tmLoc ==null) && this.location==tmLoc.getLocation())
-								inputLocations.add(locationFuture);
+//							if(!(tmLoc ==null) && this.location==tmLoc.getLocation())
+//								inputLocations.add(locationFuture);
 							break;
 						}
 					}

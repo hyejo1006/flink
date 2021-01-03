@@ -342,8 +342,13 @@ public class Execution implements AccessExecution, Archiveable<ArchivedExecution
 	public TaskManagerLocation getAssignedResourceLocation() {
 		// returns non-null only when a location is already assigned
 		final LogicalSlot currentAssignedResource = assignedResource;
+
+		//hyejo
 		if(currentAssignedResource != null)
 			currentAssignedResource.getTaskManagerLocation().setLocation(vertex.getLocation());
+		//hyejo
+
+
 		return currentAssignedResource != null ? currentAssignedResource.getTaskManagerLocation() : null;
 	}
 
@@ -436,8 +441,10 @@ public class Execution implements AccessExecution, Archiveable<ArchivedExecution
 			SlotProviderStrategy slotProviderStrategy,
 			LocationPreferenceConstraint locationPreferenceConstraint,
 			@Nonnull Set<AllocationID> allPreviousExecutionGraphAllocationIds) {
-
+		//hyejo
 		System.out.println("Execution.scheduleForExecution\n");
+		//
+
 		assertRunningInJobMasterMainThread();
 		try {
 			final CompletableFuture<Execution> allocationFuture = allocateResourcesForExecution(
@@ -525,11 +532,13 @@ public class Execution implements AccessExecution, Archiveable<ArchivedExecution
 
 		SlotSharingGroup sharingGroup = vertex.getJobVertex().getSlotSharingGroup();
 		CoLocationConstraint locationConstraint = vertex.getLocationConstraint();
-
-		if(locationConstraint != null && locationConstraint.getLocation().getLocation() != vertex.getLocation()) {
-			locationConstraint = null;
-			sharingGroup = null;
-		}
+//
+//		//hyejo
+//		if(locationConstraint != null && locationConstraint.getLocation().getLocation() != vertex.getLocation()) {
+//			locationConstraint = null;
+//			sharingGroup = null;
+//		}
+//		//
 
 		// sanity check
 		if (locationConstraint != null && sharingGroup == null) {
@@ -546,6 +555,11 @@ public class Execution implements AccessExecution, Archiveable<ArchivedExecution
 					new ScheduledUnit(this, slotSharingGroupId) :
 					new ScheduledUnit(this, slotSharingGroupId, locationConstraint);
 
+			if(locationConstraint != null && locationConstraint.getLocation().getLocation() != vertex.getLocation()) {
+				toSchedule = new ScheduledUnit(this);
+				locationPreferenceConstraint = LocationPreferenceConstraint.PIPELINEBROKEN;
+			}
+
 			// try to extract previous allocation ids, if applicable, so that we can reschedule to the same slot
 			ExecutionVertex executionVertex = getVertex();
 			AllocationID lastAllocation = executionVertex.getLatestPriorAllocation();
@@ -559,12 +573,14 @@ public class Execution implements AccessExecution, Archiveable<ArchivedExecution
 
 			final SlotRequestId slotRequestId = new SlotRequestId();
 
+			ScheduledUnit finalToSchedule = toSchedule;
+
 			final CompletableFuture<LogicalSlot> logicalSlotFuture =
 				preferredLocationsFuture.thenCompose(
 					(Collection<TaskManagerLocation> preferredLocations) ->
 						slotProviderStrategy.allocateSlot(
 							slotRequestId,
-							toSchedule,
+							finalToSchedule,
 							new SlotProfile(
 								vertex.getResourceProfile(),
 								preferredLocations,
@@ -625,7 +641,10 @@ public class Execution implements AccessExecution, Archiveable<ArchivedExecution
 			ExecutionVertex vertex,
 			TaskManagerLocation location,
 			ExecutionAttemptID attemptId) {
+		//hyejo
 		location.setLocation(vertex.getLocation());
+		//
+
 		ProducerDescriptor producerDescriptor = ProducerDescriptor.create(location, attemptId);
 
 		boolean lazyScheduling = vertex.getExecutionGraph().getScheduleMode().allowLazyDeployment();
@@ -1413,7 +1432,9 @@ public class Execution implements AccessExecution, Archiveable<ArchivedExecution
 		if (slot != null) {
 			final TaskManagerGateway taskManagerGateway = slot.getTaskManagerGateway();
 			final TaskManagerLocation taskManagerLocation = slot.getTaskManagerLocation();
+			//hyejo
 			taskManagerLocation.setLocation(vertex.getLocation());
+			//
 
 			CompletableFuture<Acknowledge> updatePartitionsResultFuture = taskManagerGateway.updatePartitions(attemptId, partitionInfos, rpcTimeout);
 
@@ -1489,13 +1510,29 @@ public class Execution implements AccessExecution, Archiveable<ArchivedExecution
 						if (taskManagerLocation == null) {
 							throw new FlinkRuntimeException("TaskManagerLocationFuture was completed with null. This indicates a programming bug.");
 						}
-
-						taskManagerLocation.setLocation(vertex.getLocation());
 						completedTaskManagerLocations.add(taskManagerLocation);
 					}
 				}
 
 				preferredLocationsFuture = CompletableFuture.completedFuture(completedTaskManagerLocations);
+				break;
+			case PIPELINEBROKEN:
+				System.out.println("thesis test: pipelinebroken");
+				final ArrayList<TaskManagerLocation> completedTaskManagerLocations2 = new ArrayList<>(preferredLocationFutures.size());
+
+				for (CompletableFuture<TaskManagerLocation> preferredLocationFuture : preferredLocationFutures) {
+					if (preferredLocationFuture.isDone() && !preferredLocationFuture.isCompletedExceptionally()) {
+						final TaskManagerLocation taskManagerLocation = preferredLocationFuture.getNow(null);
+
+						if (taskManagerLocation == null) {
+							throw new FlinkRuntimeException("TaskManagerLocationFuture was completed with null. This indicates a programming bug.");
+						}
+						if(taskManagerLocation.getLocation()==vertex.getLocation())
+							completedTaskManagerLocations2.add(taskManagerLocation);
+					}
+				}
+
+				preferredLocationsFuture = CompletableFuture.completedFuture(completedTaskManagerLocations2);
 				break;
 			default:
 				throw new RuntimeException("Unknown LocationPreferenceConstraint " + locationPreferenceConstraint + '.');
