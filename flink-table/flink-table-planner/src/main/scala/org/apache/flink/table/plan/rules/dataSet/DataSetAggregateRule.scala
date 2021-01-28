@@ -63,7 +63,7 @@ class DataSetAggregateRule
       agg.getNamedAggCalls,
       rel.getRowType,
       agg.getInput.getRowType,
-      agg.getGroupSet.toArray
+      agg.getGroupSet.toArray, agg.getAddress
     )
   }
 }

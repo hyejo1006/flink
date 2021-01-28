@@ -102,6 +102,7 @@ public interface Table {
 	 * </pre>
 	 */
 	Table select(String fields);
+	Table select(String location, String fields);
 
 	/**
 	 * Performs a selection operation. Similar to a SQL SELECT statement. The field expressions
@@ -116,6 +117,7 @@ public interface Table {
 	 * </pre>
 	 */
 	Table select(Expression... fields);
+	Table select(String location, boolean hasLoc, Expression... fields);
 
 	/**
 	 * Creates {@link TemporalTableFunction} backed up by this table as a history table.
@@ -300,6 +302,7 @@ public interface Table {
 	 * </pre>
 	 */
 	Table join(Table right);
+	Table join(String location, Table right);
 
 	/**
 	 * Joins two {@link Table}s. Similar to a SQL join. The fields of the two joined

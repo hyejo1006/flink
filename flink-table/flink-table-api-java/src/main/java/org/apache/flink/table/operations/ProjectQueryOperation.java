@@ -38,6 +38,9 @@ public class ProjectQueryOperation implements QueryOperation {
 	private final List<ResolvedExpression> projectList;
 	private final QueryOperation child;
 	private final TableSchema tableSchema;
+	private String location;
+	public String getLocation(){return location;}
+	public void setLocation(String newLoc){location = newLoc;}
 
 	public ProjectQueryOperation(
 			List<ResolvedExpression> projectList,
@@ -46,6 +49,15 @@ public class ProjectQueryOperation implements QueryOperation {
 		this.projectList = projectList;
 		this.child = child;
 		this.tableSchema = tableSchema;
+	}
+	public ProjectQueryOperation(
+		List<ResolvedExpression> projectList,
+		QueryOperation child,
+		TableSchema tableSchema, String location) {
+		this.projectList = projectList;
+		this.child = child;
+		this.tableSchema = tableSchema;
+		this.location = location;
 	}
 
 	public List<ResolvedExpression> getProjectList() {

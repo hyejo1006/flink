@@ -110,6 +110,8 @@ public abstract class DataSet<T> {
 
 	protected final ExecutionEnvironment context;
 	protected String location;
+	public String getLocation(){return location;}
+	public void setLoc(String newLoc){location=newLoc;}
 
 	// NOTE: the type must not be accessed directly, but only via getType()
 	private TypeInformation<T> type;

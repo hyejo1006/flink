@@ -21,6 +21,7 @@ package org.apache.flink.table.api.java.internal;
 import org.apache.flink.api.common.JobExecutionResult;
 import org.apache.flink.api.common.time.Time;
 import org.apache.flink.api.dag.Transformation;
+import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.Table;

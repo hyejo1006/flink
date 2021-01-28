@@ -18,11 +18,12 @@
 
 package org.apache.flink.table.plan.nodes.dataset
 
+import org.apache.calcite.rel.SingleRel
 import org.apache.calcite.plan.{RelOptCluster, RelOptCost, RelOptPlanner, RelTraitSet}
 import org.apache.calcite.rel.`type`.RelDataType
 import org.apache.calcite.rel.core.AggregateCall
 import org.apache.calcite.rel.metadata.RelMetadataQuery
-import org.apache.calcite.rel.{RelNode, RelWriter, SingleRel}
+import org.apache.calcite.rel.{RelNode, RelWriter}
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.java.DataSet
 import org.apache.flink.api.java.typeutils.RowTypeInfo
@@ -45,8 +46,10 @@ class DataSetAggregate(
     namedAggregates: Seq[CalcitePair[AggregateCall, String]],
     rowRelDataType: RelDataType,
     inputType: RelDataType,
-    grouping: Array[Int])
+    grouping: Array[Int], location: String)
   extends SingleRel(cluster, traitSet, inputNode) with CommonAggregate with DataSetRel {
+
+  var testaddress = location
 
   override def deriveRowType(): RelDataType = rowRelDataType
 
@@ -58,7 +61,7 @@ class DataSetAggregate(
       namedAggregates,
       getRowType,
       inputType,
-      grouping)
+      grouping, testaddress)
   }
 
   override def toString: String = {
@@ -75,6 +78,7 @@ class DataSetAggregate(
     super.explainTerms(pw)
       .itemIf("groupBy", groupingToString(inputType, grouping), !grouping.isEmpty)
       .item("select", aggregationToString(inputType, grouping, getRowType, namedAggregates, Nil))
+      .item("address", testaddress)
   }
 
   override def computeSelfCost(planner: RelOptPlanner, metadata: RelMetadataQuery): RelOptCost = {

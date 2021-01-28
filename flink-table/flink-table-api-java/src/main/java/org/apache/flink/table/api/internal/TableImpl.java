@@ -69,6 +69,7 @@ public class TableImpl implements Table {
 	private final LookupCallResolver lookupResolver;
 
 	private String tableName = null;
+	private String location;
 
 	public TableEnvironment getTableEnvironment() {
 		return tableEnvironment;
@@ -85,6 +86,18 @@ public class TableImpl implements Table {
 		this.lookupResolver = lookupResolver;
 	}
 
+	private TableImpl(
+		TableEnvironment tableEnvironment,
+		QueryOperation operationTree,
+		OperationTreeBuilder operationTreeBuilder,
+		LookupCallResolver lookupResolver, String location) {
+		this.tableEnvironment = tableEnvironment;
+		this.operationTree = operationTree;
+		this.operationTreeBuilder = operationTreeBuilder;
+		this.lookupResolver = lookupResolver;
+		this.location = location;
+	}
+
 	public static TableImpl createTable(
 			TableEnvironment tableEnvironment,
 			QueryOperation operationTree,
@@ -95,6 +108,17 @@ public class TableImpl implements Table {
 			operationTree,
 			operationTreeBuilder,
 			new LookupCallResolver(functionLookup));
+	}
+	public static TableImpl createTable(
+		TableEnvironment tableEnvironment,
+		QueryOperation operationTree,
+		OperationTreeBuilder operationTreeBuilder,
+		FunctionLookup functionLookup, String location) {
+		return new TableImpl(
+			tableEnvironment,
+			operationTree,
+			operationTreeBuilder,
+			new LookupCallResolver(functionLookup), location);
 	}
 
 	@Override
@@ -115,6 +139,35 @@ public class TableImpl implements Table {
 	@Override
 	public Table select(String fields) {
 		return select(ExpressionParser.parseExpressionList(fields).toArray(new Expression[0]));
+	}
+	@Override
+	public Table select(String location, String fields) {
+		return select(location, true, ExpressionParser.parseExpressionList(fields).toArray(new Expression[0]));
+	}
+
+	@Override
+	public Table select(String location, boolean hasLoc, Expression... fields) {
+		List<Expression> expressionsWithResolvedCalls = Arrays.stream(fields)
+			.map(f -> f.accept(lookupResolver))
+			.collect(Collectors.toList());
+		CategorizedExpressions extracted = OperationExpressionsUtils.extractAggregationsAndProperties(
+			expressionsWithResolvedCalls
+		);
+
+		if (!extracted.getWindowProperties().isEmpty()) {
+			throw new ValidationException("Window properties can only be used on windowed tables.");
+		}
+
+		if (!extracted.getAggregations().isEmpty()) {
+			QueryOperation aggregate = operationTreeBuilder.aggregate(
+				Collections.emptyList(),
+				extracted.getAggregations(),
+				operationTree, location
+			);
+			return createTable(operationTreeBuilder.project(extracted.getProjections(), aggregate, false, location), location);
+		} else {
+			return createTable(operationTreeBuilder.project(expressionsWithResolvedCalls, operationTree, false, location), location);
+		}
 	}
 
 	@Override
@@ -211,6 +264,10 @@ public class TableImpl implements Table {
 	public Table join(Table right) {
 		return joinInternal(right, Optional.empty(), JoinType.INNER);
 	}
+	@Override
+	public Table join(String location, Table right) {
+		return joinInternal(location, right, Optional.empty(), JoinType.INNER);
+	}
 
 	@Override
 	public Table join(Table right, String joinPredicate) {
@@ -269,6 +326,19 @@ public class TableImpl implements Table {
 			joinType,
 			joinPredicate,
 			false));
+	}
+	private TableImpl joinInternal(String location,
+		Table right,
+		Optional<Expression> joinPredicate,
+		JoinType joinType) {
+		verifyTableCompatible(right);
+
+		return createTable(operationTreeBuilder.join(
+			this.operationTree,
+			right.getQueryOperation(),
+			joinType,
+			joinPredicate,
+			false, location), location);
 	}
 
 	private void verifyTableCompatible(Table right) {
@@ -561,6 +631,9 @@ public class TableImpl implements Table {
 
 	private TableImpl createTable(QueryOperation operation) {
 		return new TableImpl(tableEnvironment, operation, operationTreeBuilder, lookupResolver);
+	}
+	private TableImpl createTable(QueryOperation operation, String location) {
+		return new TableImpl(tableEnvironment, operation, operationTreeBuilder, lookupResolver, location);
 	}
 
 	private static final class GroupedTableImpl implements GroupedTable {

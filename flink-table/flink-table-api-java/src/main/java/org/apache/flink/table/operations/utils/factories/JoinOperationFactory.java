@@ -47,6 +47,10 @@ import static java.util.Arrays.asList;
 public class JoinOperationFactory {
 
 	private final EquiJoinExistsChecker equiJoinExistsChecker = new EquiJoinExistsChecker();
+	private String location="joinopfactory";
+
+	public String getLocation(){return location;}
+	public void setLocation(String newLoc){location=newLoc;}
 
 	/**
 	 * Creates a valid {@link JoinQueryOperation} operation.
@@ -76,6 +80,18 @@ public class JoinOperationFactory {
 		validateNamesAmbiguity(left, right);
 		validateCondition(right, joinType, condition, correlated);
 		return new JoinQueryOperation(left, right, joinType, condition, correlated);
+	}
+	public QueryOperation create(
+		QueryOperation left,
+		QueryOperation right,
+		JoinType joinType,
+		ResolvedExpression condition,
+		boolean correlated,String location) {
+		verifyConditionType(condition);
+		validateNamesAmbiguity(left, right);
+		validateCondition(right, joinType, condition, correlated);
+		this.location = location;
+		return new JoinQueryOperation(left, right, joinType, condition, correlated, location);
 	}
 
 	private void validateCondition(QueryOperation right, JoinType joinType, ResolvedExpression condition, boolean correlated) {

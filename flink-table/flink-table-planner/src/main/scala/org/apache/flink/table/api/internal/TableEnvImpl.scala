@@ -196,6 +196,17 @@ abstract class TableEnvImpl(
     val tableTable = new QueryOperationCatalogView(table.getQueryOperation)
     registerTableInternal(name, tableTable)
   }
+  override def registerTable(location: String, name: String, table: Table): Unit = {
+
+    // check that table belongs to this table environment
+    if (table.asInstanceOf[TableImpl].getTableEnvironment != this) {
+      throw new TableException(
+        "Only tables that belong to this TableEnvironment can be registered.")
+    }
+
+    val tableTable = new QueryOperationCatalogView(location, table.getQueryOperation)
+    registerTableInternal(location, name, tableTable)
+  }
 
   override def registerTableSource(name: String, tableSource: TableSource[_]): Unit = {
     validateTableSource(tableSource)
@@ -364,6 +375,19 @@ abstract class TableEnvImpl(
       case None => throw new TableException("The built-in catalog does not exist.")
     }
   }
+  protected def registerTableInternal(location: String, name: String, table: CatalogBaseTable): Unit = {
+    checkValidTableName(name)
+    val path = new ObjectPath(catalogManager.getBuiltInDatabaseName, name)
+    JavaScalaConversionUtil.toScala(
+      catalogManager.getCatalog(catalogManager.getBuiltInCatalogName)) match {
+      case Some(catalog) =>
+        catalog.createTable(
+          path,
+          table,
+          false)
+      case None => throw new TableException("The built-in catalog does not exist.")
+    }
+  }
 
   protected def replaceTableInternal(name: String, table: CatalogBaseTable): Unit = {
     checkValidTableName(name)
@@ -386,7 +410,18 @@ abstract class TableEnvImpl(
       case None => throw new TableException(s"Table '${tablePath.mkString(".")}' was not found.")
     }
   }
+  @throws[TableException]
+  override def scan(location: String, tablePath: String): Table = {
+    scanInternal(location, tablePath) match {
+      case Some(table) => createTable(table, location)
+      case None => throw new TableException(s"Table '${tablePath.mkString(".")}' was not found.")
+    }
+  }
 
+  private[flink] def scanInternal(location: String, tablePath: String): Option[CatalogQueryOperation] = {
+    JavaScalaConversionUtil.toScala(catalogManager.resolveTable(tablePath: String))
+      .map(t => new CatalogQueryOperation(t.getTablePath, t.getTableSchema, location))
+  }
   private[flink] def scanInternal(tablePath: Array[String]): Option[CatalogQueryOperation] = {
     JavaScalaConversionUtil.toScala(catalogManager.resolveTable(tablePath: _*))
       .map(t => new CatalogQueryOperation(t.getTablePath, t.getTableSchema))
@@ -498,6 +533,13 @@ abstract class TableEnvImpl(
       tableOperation,
       operationTreeBuilder,
       functionCatalog)
+  }
+  protected def createTable(tableOperation: QueryOperation, location: String): TableImpl = {
+    TableImpl.createTable(
+      this,
+      tableOperation,
+      operationTreeBuilder,
+      functionCatalog, location)
   }
 
   /**

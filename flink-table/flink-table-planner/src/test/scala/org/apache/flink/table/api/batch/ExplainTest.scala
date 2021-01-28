@@ -38,7 +38,8 @@ class ExplainTest
     val tEnv = BatchTableEnvironment.create(env)
 
     val scan = env.fromElements((1, "hello")).toTable(tEnv, 'a, 'b)
-    val table = scan.filter("a % 2 = 0")
+    //val table = scan.filter("a % 2 = 0")
+    val table = scan.select("18",true,'a)
 
     val result = tEnv.explain(table).replaceAll("\\r\\n", "\n")
     val source = scala.io.Source.fromFile(testFilePath +
@@ -72,7 +73,13 @@ class ExplainTest
 
     val table1 = env.fromElements((1, "hello")).toTable(tEnv, 'a, 'b)
     val table2 = env.fromElements((1, "hello")).toTable(tEnv, 'c, 'd)
-    val table = table1.join(table2).where("b = d").select("a, c")
+    val table3 = tEnv.fromDataSet("table3", table1)
+    val table4 = tEnv.fromDataSet("table4", table2)
+    val table5 = tEnv.fromDataSet("table5", table3)
+    val table6 = tEnv.fromDataSet("table6", table4)
+    //val result4 = tEnv.explain(table1).replaceAll("\\r\\n", "\n")
+
+    val table = table5.join("jointest",table6).where("b = d").select("selecttest","a, c")
 
     val result = tEnv.explain(table).replaceAll("\\r\\n", "\n")
     val source = scala.io.Source.fromFile(testFilePath +

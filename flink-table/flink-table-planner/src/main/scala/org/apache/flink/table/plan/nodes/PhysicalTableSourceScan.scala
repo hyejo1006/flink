@@ -18,10 +18,10 @@
 
 package org.apache.flink.table.plan.nodes
 
+import org.apache.calcite.rel.core.TableScan
 import org.apache.calcite.plan.{RelOptCluster, RelOptTable, RelTraitSet}
 import org.apache.calcite.rel.RelWriter
 import org.apache.calcite.rel.`type`.RelDataType
-import org.apache.calcite.rel.core.TableScan
 import org.apache.flink.table.calcite.FlinkTypeFactory
 import org.apache.flink.table.sources.{StreamTableSource, TableSource, TableSourceUtil}
 

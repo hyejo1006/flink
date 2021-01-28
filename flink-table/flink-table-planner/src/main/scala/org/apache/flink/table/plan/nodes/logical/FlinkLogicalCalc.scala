@@ -18,10 +18,10 @@
 
 package org.apache.flink.table.plan.nodes.logical
 
+import org.apache.calcite.rel.core.Calc
 import org.apache.calcite.plan._
 import org.apache.calcite.rel.RelNode
 import org.apache.calcite.rel.convert.ConverterRule
-import org.apache.calcite.rel.core.Calc
 import org.apache.calcite.rel.logical.LogicalCalc
 import org.apache.calcite.rel.metadata.RelMetadataQuery
 import org.apache.calcite.rex.RexProgram
@@ -31,13 +31,20 @@ class FlinkLogicalCalc(
     cluster: RelOptCluster,
     traitSet: RelTraitSet,
     input: RelNode,
-    calcProgram: RexProgram)
+    calcProgram: RexProgram, location: String)
   extends Calc(cluster, traitSet, input, calcProgram)
   with FlinkLogicalRel
   with CommonCalc {
 
+  var address = location
+  def setAddress(newLoc: String) ={
+    address = newLoc
+    super.setLocation(address)
+  }
+  def getAddress:String=address
+
   override def copy(traitSet: RelTraitSet, child: RelNode, program: RexProgram): Calc = {
-    new FlinkLogicalCalc(cluster, traitSet, child, program)
+    new FlinkLogicalCalc(cluster, traitSet, child, program, address)
   }
 
   override def computeSelfCost(planner: RelOptPlanner, mq: RelMetadataQuery): RelOptCost = {
@@ -65,7 +72,7 @@ private class FlinkLogicalCalcConverter
     val traitSet = rel.getTraitSet.replace(FlinkConventions.LOGICAL)
     val newInput = RelOptRule.convert(calc.getInput, FlinkConventions.LOGICAL)
 
-    new FlinkLogicalCalc(rel.getCluster, traitSet, newInput, calc.getProgram)
+    new FlinkLogicalCalc(rel.getCluster, traitSet, newInput, calc.getProgram, calc.getLocation)
   }
 }
 

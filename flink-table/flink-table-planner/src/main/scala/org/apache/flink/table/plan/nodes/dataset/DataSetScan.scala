@@ -18,10 +18,10 @@
 
 package org.apache.flink.table.plan.nodes.dataset
 
+import org.apache.calcite.rel.core.TableScan
 import org.apache.calcite.plan._
 import org.apache.calcite.prepare.RelOptTableImpl
 import org.apache.calcite.rel.`type`.RelDataType
-import org.apache.calcite.rel.core.TableScan
 import org.apache.calcite.rel.metadata.RelMetadataQuery
 import org.apache.calcite.rel.{RelNode, RelWriter}
 import org.apache.flink.api.java.DataSet
@@ -49,14 +49,15 @@ class DataSetScan(
     inputDataSet: DataSet[_],
     fieldIdxs: Array[Int],
     rowRelDataType: RelDataType,
-    address: String)
+    location: String)
   extends TableScan(
     cluster,
     traitSet,
     RelOptTableImpl.create(catalog, rowRelDataType, List[String]().asJava, null))
   with BatchScan {
 
-  var testaddress = "scanaddress"
+  //var testaddress = address
+  //this.location = address
 
   override def deriveRowType(): RelDataType = rowRelDataType
 
@@ -75,7 +76,7 @@ class DataSetScan(
       inputDataSet,
       fieldIdxs,
       getRowType,
-      testaddress
+      location
     )
   }
 
@@ -84,11 +85,11 @@ class DataSetScan(
       queryConfig: BatchQueryConfig): DataSet[Row] = {
     val schema = new RowSchema(rowRelDataType)
     val config = tableEnv.getConfig
-    convertToInternalRow(schema, inputDataSet.asInstanceOf[DataSet[Any]], fieldIdxs, config, None, testaddress)
+    convertToInternalRow(schema, inputDataSet.asInstanceOf[DataSet[Any]], fieldIdxs, config, None, location)
   }
 
   override def explainTerms(pw: RelWriter): RelWriter = pw
     .item("ref", System.identityHashCode(inputDataSet))
     .item("fields", String.join(", ", rowRelDataType.getFieldNames))
-    .item("address", testaddress)
+    .item("address", location)
 }

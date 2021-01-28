@@ -18,9 +18,9 @@
 
 package org.apache.flink.table.plan.nodes.dataset
 
+import org.apache.calcite.rel.core.Calc
 import org.apache.calcite.plan.{RelOptCluster, RelOptCost, RelOptPlanner, RelTraitSet}
 import org.apache.calcite.rel.`type`.RelDataType
-import org.apache.calcite.rel.core.Calc
 import org.apache.calcite.rel.metadata.RelMetadataQuery
 import org.apache.calcite.rel.{RelNode, RelWriter}
 import org.apache.calcite.rex._
@@ -54,7 +54,8 @@ class DataSetCalc(
   with CommonCalc
   with DataSetRel {
 
-  val testaddress = "datasetcalc"
+  var testaddress = address
+
   override def deriveRowType(): RelDataType = rowRelDataType
 
   override def copy(traitSet: RelTraitSet, child: RelNode, program: RexProgram): Calc = {

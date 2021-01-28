@@ -38,7 +38,6 @@ public class PlanJsonParser {
 
 		// not every node is same, ignore the unknown field
 		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		System.out.println("obj: " + objectMapper);
 		PlanTree tree = objectMapper.readValue(t, PlanTree.class);
 		LinkedHashMap<String, Integer> map = new LinkedHashMap<>();
 		StringWriter sw = new StringWriter();

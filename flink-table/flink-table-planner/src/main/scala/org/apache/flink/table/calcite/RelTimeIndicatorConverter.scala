@@ -18,6 +18,9 @@
 
 package org.apache.flink.table.calcite
 
+import org.apache.calcite.rel.logical.LogicalAggregate
+import org.apache.calcite.rel.core.Aggregate
+
 import org.apache.calcite.rel.`type`.RelDataType
 import org.apache.calcite.rel.core._
 import org.apache.calcite.rel.logical._
@@ -88,7 +91,7 @@ class RelTimeIndicatorConverter(rexBuilder: RexBuilder) extends RelShuttle {
     LogicalUnion.create(inputs, union.all)
   }
 
-  override def visit(aggregate: LogicalAggregate): RelNode = convertAggregate(aggregate)
+  def visit(aggregate: LogicalAggregate): RelNode = convertAggregate(aggregate)
 
   override def visit(minus: LogicalMinus): RelNode =
     throw new TableException("Logical minus in a stream environment is not supported yet.")

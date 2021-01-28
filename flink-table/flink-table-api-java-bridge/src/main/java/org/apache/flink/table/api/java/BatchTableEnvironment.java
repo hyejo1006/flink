@@ -87,6 +87,7 @@ public interface BatchTableEnvironment extends TableEnvironment {
 	 * @return The converted {@link Table}.
 	 */
 	<T> Table fromDataSet(DataSet<T> dataSet);
+	<T> Table fromDataSet(String location, DataSet<T> dataSet);
 
 	/**
 	 * Converts the given {@link DataSet} into a {@link Table} with specified field names.
@@ -106,6 +107,7 @@ public interface BatchTableEnvironment extends TableEnvironment {
 	 * @return The converted {@link Table}.
 	 */
 	<T> Table fromDataSet(DataSet<T> dataSet, String fields);
+	<T> Table fromDataSet(String location, DataSet<T> dataSet, String fields);
 
 	/**
 	 * Registers the given {@link DataSet} as table in the
@@ -251,7 +253,7 @@ public interface BatchTableEnvironment extends TableEnvironment {
 	 */
 	void insertInto(Table table, BatchQueryConfig queryConfig, String sinkPath, String... sinkPathContinued);
 
-	/**
+        /**
 	 * Creates a table source and/or table sink from a descriptor.
 	 *
 	 * <p>Descriptors allow for declaring the communication to external systems in an

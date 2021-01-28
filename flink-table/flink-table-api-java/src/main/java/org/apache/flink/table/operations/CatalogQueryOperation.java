@@ -34,11 +34,21 @@ public class CatalogQueryOperation implements QueryOperation {
 
 	private final List<String> tablePath;
 	private final TableSchema tableSchema;
+	private String location="catalogqueryoperation";
 
 	public CatalogQueryOperation(List<String> tablePath, TableSchema tableSchema) {
 		this.tablePath = tablePath;
 		this.tableSchema = tableSchema;
 	}
+
+	public CatalogQueryOperation(List<String> tablePath, TableSchema tableSchema, String location) {
+		this.tablePath = tablePath;
+		this.tableSchema = tableSchema;
+		this.location=location;
+	}
+
+	public String getLocation(){return location;}
+	public void setLocation(String newLoc){location=newLoc;}
 
 	public List<String> getTablePath() {
 		return tablePath;

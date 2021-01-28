@@ -20,8 +20,9 @@ package org.apache.flink.table.plan.logical.rel
 
 import java.util
 
+import org.apache.calcite.rel.core.Aggregate
 import org.apache.calcite.plan.{Convention, RelOptCluster, RelTraitSet}
-import org.apache.calcite.rel.core.{Aggregate, AggregateCall}
+import org.apache.calcite.rel.core.AggregateCall
 import org.apache.calcite.rel.RelNode
 import org.apache.calcite.util.ImmutableBitSet
 

@@ -18,10 +18,10 @@
 
 package org.apache.flink.table.plan.rules.dataSet
 
+import org.apache.calcite.rel.core.TableScan
 import org.apache.calcite.plan.{RelOptRule, RelOptRuleCall, RelTraitSet}
 import org.apache.calcite.rel.RelNode
 import org.apache.calcite.rel.convert.ConverterRule
-import org.apache.calcite.rel.core.TableScan
 import org.apache.flink.table.plan.nodes.FlinkConventions
 import org.apache.flink.table.plan.nodes.dataset.BatchTableSourceScan
 import org.apache.flink.table.plan.nodes.logical.FlinkLogicalTableSourceScan

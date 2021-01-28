@@ -21,6 +21,7 @@ package org.apache.flink.table.plan.rules.logical
 import java.util.Collections
 
 import com.google.common.collect.ImmutableList
+import org.apache.calcite.rel.logical
 import org.apache.calcite.plan.RelOptRule._
 import org.apache.calcite.plan.volcano.RelSubset
 import org.apache.calcite.plan.{RelOptRule, RelOptRuleCall, RelOptRuleOperand}
@@ -51,13 +52,13 @@ class LogicalUnnestRule(
       case filter: LogicalFilter =>
         filter.getInput.asInstanceOf[RelSubset].getOriginal match {
           case u: Uncollect => !u.withOrdinality
-          case p: LogicalProject => p.getInput.asInstanceOf[RelSubset].getOriginal match {
+          case p: logical.LogicalProject => p.getInput.asInstanceOf[RelSubset].getOriginal match {
             case u: Uncollect => !u.withOrdinality
             case _ => false
           }
           case _ => false
         }
-      case p: LogicalProject => p.getInput.asInstanceOf[RelSubset].getOriginal match {
+      case p: logical.LogicalProject => p.getInput.asInstanceOf[RelSubset].getOriginal match {
         case u: Uncollect => !u.withOrdinality
         case _ => false
       }
@@ -77,7 +78,7 @@ class LogicalUnnestRule(
         case rs: RelSubset =>
           convert(rs.getRelList.get(0))
 
-        case p: LogicalProject =>
+        case p: logical.LogicalProject =>
           p.copy(
             p.getTraitSet,
             ImmutableList.of(convert(p.getInput.asInstanceOf[RelSubset].getOriginal)))
@@ -123,7 +124,7 @@ class LogicalUnnestRule(
           val rexCall = cluster.getRexBuilder.makeCall(
             explodeSqlFunc,
             uc.getInput.asInstanceOf[RelSubset]
-              .getOriginal.asInstanceOf[LogicalProject].getChildExps
+              .getOriginal.asInstanceOf[logical.LogicalProject].getChildExps
           )
 
           // determine rel data type of unnest

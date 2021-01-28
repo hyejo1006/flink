@@ -412,7 +412,7 @@ public interface StreamTableEnvironment extends TableEnvironment {
 	 */
 	<T> DataStream<Tuple2<Boolean, T>> toRetractStream(Table table, TypeInformation<T> typeInfo, StreamQueryConfig queryConfig);
 
-	/**
+    /**
 	 * Creates a table source and/or table sink from a descriptor.
 	 *
 	 * <p>Descriptors allow for declaring the communication to external systems in an

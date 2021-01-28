@@ -60,6 +60,10 @@ public class MapOperator<IN, OUT> extends SingleInputUdfOperator<IN, OUT, MapOpe
 	}
 
 	public String getLocation(){return this.location;}
+	public void setLoc(String newLoc){
+		location=newLoc;
+		super.setLoc(newLoc);
+	}
 
 	@Override
 	protected MapFunction<IN, OUT> getFunction() {

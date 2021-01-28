@@ -40,6 +40,10 @@ public class JoinQueryOperation implements QueryOperation {
 	private final ResolvedExpression condition;
 	private final boolean correlated;
 	private final TableSchema tableSchema;
+	private String location;
+
+	public String getLocation(){return location;}
+	public void setLocation(String newLoc){location=newLoc;}
 
 	/**
 	 * Specifies how the two Tables should be joined.
@@ -64,6 +68,22 @@ public class JoinQueryOperation implements QueryOperation {
 		this.correlated = correlated;
 
 		this.tableSchema = calculateResultingSchema(left, right);
+	}
+
+	public JoinQueryOperation(
+		QueryOperation left,
+		QueryOperation right,
+		JoinType joinType,
+		ResolvedExpression condition,
+		boolean correlated, String location) {
+		this.left = left;
+		this.right = right;
+		this.joinType = joinType;
+		this.condition = condition;
+		this.correlated = correlated;
+
+		this.tableSchema = calculateResultingSchema(left, right);
+		this.location = location;
 	}
 
 	private TableSchema calculateResultingSchema(QueryOperation left, QueryOperation right) {

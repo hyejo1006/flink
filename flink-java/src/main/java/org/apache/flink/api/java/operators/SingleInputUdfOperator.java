@@ -84,6 +84,10 @@ public abstract class SingleInputUdfOperator<IN, OUT, O extends SingleInputUdfOp
 	protected abstract Function getFunction();
 
 	public String getLocation(){return this.location;}
+	public void setLoc(String newLoc){
+		location=newLoc;
+		super.setLoc(newLoc);
+	}
 	// --------------------------------------------------------------------------------------------
 	// Fluent API methods
 	// --------------------------------------------------------------------------------------------

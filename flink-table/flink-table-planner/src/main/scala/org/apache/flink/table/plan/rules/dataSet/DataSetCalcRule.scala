@@ -44,7 +44,7 @@ class DataSetCalcRule
         rel.getRowType,
         calc.getProgram,
         description,
-      "datasetcalcruleaddress")
+        calc.getAddress)
     }
   }
 

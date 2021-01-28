@@ -105,7 +105,7 @@ public abstract class JoinOperator<I1, I2, OUT> extends TwoInputUdfOperator<I1, 
 
 	private Partitioner<?> customPartitioner;
 
-	protected String location = "joinop";
+	protected String location;
 
 	protected JoinOperator(DataSet<I1> input1, DataSet<I2> input2,
 			Keys<I1> keys1, Keys<I2> keys2,

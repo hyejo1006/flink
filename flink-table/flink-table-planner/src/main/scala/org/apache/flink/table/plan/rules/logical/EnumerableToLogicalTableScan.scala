@@ -19,9 +19,9 @@
 package org.apache.flink.table.plan.rules.logical
 
 import org.apache.calcite.adapter.enumerable.EnumerableTableScan
+import org.apache.calcite.rel.logical.LogicalTableScan
 import org.apache.calcite.plan.RelOptRule.{any, operand}
 import org.apache.calcite.plan.{RelOptRule, RelOptRuleCall, RelOptRuleOperand}
-import org.apache.calcite.rel.logical.LogicalTableScan
 
 /**
  * Rule that converts an EnumerableTableScan into a LogicalTableScan.

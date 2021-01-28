@@ -21,11 +21,12 @@ package org.apache.flink.table.plan.nodes.dataset
 import java.lang.Iterable
 import java.lang.{Boolean => JBool}
 
+import org.apache.calcite.rel.BiRel
 import org.apache.calcite.plan._
 import org.apache.calcite.rel.`type`.RelDataType
 import org.apache.calcite.rel.core.{JoinInfo, JoinRelType}
 import org.apache.calcite.rel.metadata.RelMetadataQuery
-import org.apache.calcite.rel.{BiRel, RelNode, RelWriter}
+import org.apache.calcite.rel.{RelNode, RelWriter}
 import org.apache.calcite.rex.RexNode
 import org.apache.calcite.util.mapping.IntPair
 import org.apache.flink.api.common.functions.{FilterFunction, FlatJoinFunction, GroupReduceFunction, JoinFunction}
@@ -67,7 +68,7 @@ class DataSetJoin(
   with CommonJoin
   with DataSetRel {
 
-  var testaddress = "joinaddress"
+  var testaddress = address
 
   override def deriveRowType(): RelDataType = rowRelDataType
 
@@ -255,7 +256,7 @@ class DataSetJoin(
     left.join(right, joinaddress)
       .where(leftKeys: _*)
       .equalTo(rightKeys: _*)
-      .`with`(joinFun)
+      .`with`(joinFun, joinaddress)
       .name(getJoinOpName)
   }
 

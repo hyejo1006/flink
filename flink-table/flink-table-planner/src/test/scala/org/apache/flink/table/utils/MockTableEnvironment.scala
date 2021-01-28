@@ -41,6 +41,8 @@ class MockTableEnvironment extends TableEnvironment {
 
   override def registerTable(name: String, table: Table): Unit = ???
 
+  override def registerTable(location: String, name: String, table: Table): Unit = ???
+
   override def registerTableSource(name: String, tableSource: TableSource[_]): Unit = ???
 
   override def registerTableSink(
@@ -51,6 +53,8 @@ class MockTableEnvironment extends TableEnvironment {
   override def registerTableSink(name: String, configuredSink: TableSink[_]): Unit = ???
 
   override def scan(tablePath: String*): Table = ???
+
+  override def scan(location: String,tablePath: String): Table = ???
 
   override def connect(connectorDescriptor: ConnectorDescriptor): ConnectTableDescriptor = ???
 

@@ -18,10 +18,11 @@
 
 package org.apache.flink.table.plan.nodes.dataset
 
+import org.apache.calcite.rel.BiRel
 import org.apache.calcite.plan.{RelOptCluster, RelOptCost, RelOptPlanner, RelTraitSet}
 import org.apache.calcite.rel.`type`.RelDataType
 import org.apache.calcite.rel.metadata.RelMetadataQuery
-import org.apache.calcite.rel.{BiRel, RelNode, RelWriter}
+import org.apache.calcite.rel.{RelNode, RelWriter}
 import org.apache.flink.api.java.DataSet
 import org.apache.flink.table.api.BatchQueryConfig
 import org.apache.flink.table.api.internal.BatchTableEnvImpl

@@ -61,5 +61,13 @@ class DataSetConversions[T](dataSet: DataSet[T], inputType: TypeInformation[T]) 
     }
   }
 
+  def toTable(location: String, tableEnv: BatchTableEnvironment, fields: Expression*): Table = {
+    if (fields.isEmpty) {
+      tableEnv.fromDataSet(location, dataSet)
+    } else {
+      tableEnv.fromDataSet(location, dataSet, fields: _*)
+    }
+  }
+
 }
 

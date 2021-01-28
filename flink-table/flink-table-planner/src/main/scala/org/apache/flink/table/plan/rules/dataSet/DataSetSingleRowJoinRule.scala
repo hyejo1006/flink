@@ -18,6 +18,7 @@
 
 package org.apache.flink.table.plan.rules.dataSet
 
+import org.apache.calcite.rel.core
 import org.apache.calcite.plan.volcano.RelSubset
 import org.apache.calcite.plan.{RelOptRule, RelOptRuleCall}
 import org.apache.calcite.rel.RelNode
@@ -56,10 +57,10 @@ class DataSetSingleRowJoinRule
   private def isSingleRow(node: RelNode): Boolean = {
     node match {
       case ss: RelSubset => isSingleRow(ss.getOriginal)
-      case lp: Project => isSingleRow(lp.getInput)
+      case lp: core.Project => isSingleRow(lp.getInput)
       case lf: Filter => isSingleRow(lf.getInput)
-      case lc: Calc => isSingleRow(lc.getInput)
-      case la: Aggregate => la.getGroupSet.isEmpty
+      case lc: core.Calc => isSingleRow(lc.getInput)
+      case la: core.Aggregate => la.getGroupSet.isEmpty
       case _ => false
     }
   }

@@ -49,7 +49,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Rule to extract a {@link org.apache.calcite.rel.core.Project} from a {@link LogicalAggregate},
+ * Rule to extract a {@link Project} from a {@link LogicalAggregate},
  * a {@link LogicalWindowAggregate} or a {@link TableAggregate} and push it down towards
  * the input.
  *

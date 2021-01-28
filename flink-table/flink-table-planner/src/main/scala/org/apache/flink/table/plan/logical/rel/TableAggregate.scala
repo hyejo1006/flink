@@ -20,17 +20,19 @@ package org.apache.flink.table.plan.logical.rel
 
 import java.util
 
+import org.apache.calcite.rel.SingleRel
+import org.apache.calcite.rel.core.Aggregate
+import org.apache.calcite.rel.logical.LogicalAggregate
 import org.apache.calcite.plan.{RelOptCluster, RelTraitSet}
 import org.apache.calcite.rel.`type`.RelDataType
-import org.apache.calcite.rel.core.{Aggregate, AggregateCall}
-import org.apache.calcite.rel.logical.LogicalAggregate
-import org.apache.calcite.rel.{RelNode, SingleRel}
+import org.apache.calcite.rel.core.AggregateCall
+import org.apache.calcite.rel.RelNode
 import org.apache.calcite.util.{ImmutableBitSet, Pair}
 import org.apache.flink.table.plan.nodes.CommonTableAggregate
 
 /**
   * Relational operator that represents a table aggregate. A TableAggregate is similar to the
-  * [[org.apache.calcite.rel.core.Aggregate]] but may output 0 or more records for a group.
+  * [[Aggregate]] but may output 0 or more records for a group.
   */
 abstract class TableAggregate(
   cluster: RelOptCluster,

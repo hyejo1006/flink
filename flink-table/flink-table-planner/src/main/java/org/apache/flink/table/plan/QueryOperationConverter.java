@@ -136,7 +136,7 @@ public class QueryOperationConverter extends QueryOperationDefaultVisitor<RelNod
 		public RelNode visit(ProjectQueryOperation projection) {
 			List<RexNode> rexNodes = convertToRexNodes(projection.getProjectList());
 
-			return relBuilder.project(rexNodes, asList(projection.getTableSchema().getFieldNames()), true).build();
+			return relBuilder.project(rexNodes, asList(projection.getTableSchema().getFieldNames()), true, projection.getLocation()).build();
 		}
 
 		@Override
@@ -191,7 +191,7 @@ public class QueryOperationConverter extends QueryOperationDefaultVisitor<RelNod
 			return relBuilder.join(
 				convertJoinType(join.getJoinType()),
 				join.getCondition().accept(joinExpressionVisitor),
-				corSet)
+				corSet, join.getLocation())
 				.build();
 		}
 
@@ -263,7 +263,7 @@ public class QueryOperationConverter extends QueryOperationDefaultVisitor<RelNod
 
 		@Override
 		public RelNode visit(CatalogQueryOperation catalogTable) {
-			return relBuilder.scan(catalogTable.getTablePath()).build();
+			return relBuilder.scan(catalogTable.getTablePath(), catalogTable.getLocation()).build();
 		}
 
 		@Override
@@ -342,7 +342,7 @@ public class QueryOperationConverter extends QueryOperationDefaultVisitor<RelNod
 				relBuilder.getRelOptSchema(),
 				tableOperation.getDataSet(),
 				tableOperation.getFieldIndices(),
-				logicalRowType);
+				logicalRowType, tableOperation.getLocation());
 		}
 
 		private RexNode convertToRexNode(Expression expression) {

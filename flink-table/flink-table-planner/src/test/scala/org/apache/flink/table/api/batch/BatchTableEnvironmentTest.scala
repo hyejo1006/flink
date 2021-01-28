@@ -18,8 +18,11 @@
 
 package org.apache.flink.table.api.batch
 
+import org.apache.flink.api.java.typeutils.GenericTypeInfo
 import org.apache.flink.api.scala._
+import org.apache.flink.table.api.Types
 import org.apache.flink.table.api.scala._
+import org.apache.flink.table.runtime.utils.CommonTestData.NonPojo
 import org.apache.flink.table.utils.TableTestUtil._
 import org.apache.flink.table.utils.TableTestBase
 import org.junit.Test
@@ -29,19 +32,33 @@ class BatchTableEnvironmentTest extends TableTestBase {
   @Test
   def testSqlWithoutRegistering(): Unit = {
     val util = batchTestUtil()
-    val table = util.addTable[(Long, Int, String)]("tableName", 'a, 'b, 'c)
+    val table = util.addTable[(Long, Int, String)]("test1","tableName", 'a, 'b, 'c)
 
-    val sqlTable = util.tableEnv.sqlQuery(s"SELECT a, b, c FROM $table WHERE b > 12")
+    val typeInfo = Types.ROW(
+      new GenericTypeInfo(classOf[NonPojo]),
+      new GenericTypeInfo(classOf[NonPojo]))
+    val table1 = util.addJavaTable(typeInfo, "javaTest", "java", "a, b")
 
-    val expected = unaryNode(
-      "DataSetCalc",
-      batchTableNode(table),
-      term("select", "a, b, c"),
-      term("where", ">(b, 12)"))
 
-    util.verifyTable(sqlTable, expected)
+//    val test = util.javaTableEnv.scan("test1","java").select("1818","a, b").where("a=b")
+    val test = util.tableEnv.scan("test1","tableName").select("1818","a, b").where("a=b")
+    util.explain(test)
+    //util.tableEnv.registerTable("Test3","table",test)
+    //val reg = util.tableEnv.scan("test4","table")
+    util.printJavaTable(test)
+
+   // val sqlTable = util.tableEnv.sqlQuery(s"SELECT a, b FROM $table WHERE b > 12")
+
+//    val expected = unaryNode(
+//      "DataSetCalc",
+//      batchTableNode(table),
+//      term("select", "a, b, c"),
+//      term("where", ">(b, 12)"))
+//
+//    util.verifyTable(test, expected)
 
     val table2 = util.addTable[(Long, Int, String)]('d, 'e, 'f)
+
 
     val sqlTable2 = util.tableEnv.sqlQuery(s"SELECT d, e, f FROM $table, $table2 WHERE c = d")
 

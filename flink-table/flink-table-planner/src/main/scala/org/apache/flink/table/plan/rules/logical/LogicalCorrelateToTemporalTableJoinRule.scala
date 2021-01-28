@@ -18,10 +18,11 @@
 
 package org.apache.flink.table.plan.rules.logical
 
+import org.apache.calcite.rel.{BiRel, SingleRel}
 import org.apache.calcite.plan.RelOptRule.{any, none, operand, some}
 import org.apache.calcite.plan.hep.HepRelVertex
 import org.apache.calcite.plan.{RelOptRule, RelOptRuleCall, RelOptSchema}
-import org.apache.calcite.rel.{BiRel, RelNode, SingleRel}
+import org.apache.calcite.rel.RelNode
 import org.apache.calcite.rel.core.TableFunctionScan
 import org.apache.calcite.rel.logical.LogicalCorrelate
 import org.apache.calcite.rex._

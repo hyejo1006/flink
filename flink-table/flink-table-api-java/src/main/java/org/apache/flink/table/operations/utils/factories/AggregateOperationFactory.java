@@ -99,6 +99,9 @@ public final class AggregateOperationFactory {
 		this.isStreamingMode = isStreamingMode;
 	}
 
+	private String location;
+	public String getLocation(){return location;}
+	public void setLocation(String newLoc){location=newLoc;}
 	/**
 	 * Creates a valid {@link AggregateQueryOperation} operation.
 	 *
@@ -129,6 +132,30 @@ public final class AggregateOperationFactory {
 		TableSchema tableSchema = TableSchema.builder().fields(fieldNames, fieldTypes).build();
 
 		return new AggregateQueryOperation(groupings, aggregates, child, tableSchema);
+	}
+
+	public QueryOperation createAggregate(
+		List<ResolvedExpression> groupings,
+		List<ResolvedExpression> aggregates,
+		QueryOperation child, String location) {
+		validateGroupings(groupings);
+		validateAggregates(aggregates);
+
+		DataType[] fieldTypes = Stream.concat(
+			groupings.stream().map(ResolvedExpression::getOutputDataType),
+			aggregates.stream().flatMap(this::extractAggregateResultTypes)
+		).toArray(DataType[]::new);
+
+		String[] groupNames = groupings.stream()
+			.map(expr -> extractName(expr).orElseGet(expr::toString)).toArray(String[]::new);
+		String[] fieldNames = Stream.concat(
+			Stream.of(groupNames),
+			aggregates.stream().flatMap(p -> extractAggregateNames(p, Arrays.asList(groupNames)))
+		).toArray(String[]::new);
+
+		TableSchema tableSchema = TableSchema.builder().fields(fieldNames, fieldTypes).build();
+		this.location=location;
+		return new AggregateQueryOperation(groupings, aggregates, child, tableSchema, location);
 	}
 
 	/**

@@ -18,11 +18,15 @@
 package org.apache.flink.table.plan.rules.common
 
 import com.google.common.collect.ImmutableList
+import org.apache.calcite.rel.core.Aggregate
+import org.apache.calcite.rel.logical
+import org.apache.calcite.rel.logical.LogicalAggregate
 import org.apache.calcite.plan._
 import org.apache.calcite.plan.hep.HepRelVertex
 import org.apache.calcite.rel.`type`.RelDataType
-import org.apache.calcite.rel.core.{Aggregate, AggregateCall}
-import org.apache.calcite.rel.logical.{LogicalAggregate, LogicalProject}
+import org.apache.calcite.rel.core.AggregateCall
+import org.apache.calcite.rel.logical
+import org.apache.calcite.rel.logical.LogicalProject
 import org.apache.calcite.rex._
 import org.apache.calcite.sql.`type`.SqlTypeUtil
 import org.apache.calcite.util.ImmutableBitSet
@@ -37,7 +41,7 @@ import _root_.scala.collection.JavaConversions._
 abstract class LogicalWindowAggregateRule(ruleName: String)
   extends RelOptRule(
     RelOptRule.operand(classOf[LogicalAggregate],
-      RelOptRule.operand(classOf[LogicalProject], RelOptRule.none())),
+      RelOptRule.operand(classOf[logical.LogicalProject], RelOptRule.none())),
     ruleName) {
 
   override def matches(call: RelOptRuleCall): Boolean = {
@@ -62,7 +66,7 @@ abstract class LogicalWindowAggregateRule(ruleName: String)
     */
   override def onMatch(call: RelOptRuleCall): Unit = {
     val agg = call.rel[LogicalAggregate](0)
-    val project = agg.getInput.asInstanceOf[HepRelVertex].getCurrentRel.asInstanceOf[LogicalProject]
+    val project = agg.getInput.asInstanceOf[HepRelVertex].getCurrentRel.asInstanceOf[logical.LogicalProject]
 
     val (windowExpr, windowExprIdx) = getWindowExpressions(agg).head
     val window = translateWindowExpression(windowExpr, project.getInput.getRowType)
@@ -182,7 +186,7 @@ abstract class LogicalWindowAggregateRule(ruleName: String)
 
   private[table] def getWindowExpressions(agg: LogicalAggregate): Seq[(RexCall, Int)] = {
 
-    val project = agg.getInput.asInstanceOf[HepRelVertex].getCurrentRel.asInstanceOf[LogicalProject]
+    val project = agg.getInput.asInstanceOf[HepRelVertex].getCurrentRel.asInstanceOf[logical.LogicalProject]
     val groupKeys = agg.getGroupSet
 
     // get grouping expressions

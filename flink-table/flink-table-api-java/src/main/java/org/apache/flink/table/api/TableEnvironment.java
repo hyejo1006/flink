@@ -143,6 +143,7 @@ public interface TableEnvironment {
 	 * @param table The table to register.
 	 */
 	void registerTable(String name, Table table);
+	void registerTable(String location, String name, Table table);
 
 	/**
 	 * Registers an external {@link TableSource} in this {@link TableEnvironment}'s catalog.
@@ -208,6 +209,7 @@ public interface TableEnvironment {
 	 * @see TableEnvironment#useDatabase(String)
 	 */
 	Table scan(String... tablePath);
+	Table scan(String location, String tablePath);
 
 	/**
 	 * Writes the {@link Table} to a {@link TableSink} that was registered under the specified name.

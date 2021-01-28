@@ -73,10 +73,10 @@ object DecomposeGroupingSetRule {
   }
 
   private def decompose(
-     relBuilder: RelBuilder,
-     agg: LogicalAggregate,
-     groupExprIndexes : Set[Int],
-     groupSet: ImmutableBitSet) = {
+                         relBuilder: RelBuilder,
+                         agg: LogicalAggregate,
+                         groupExprIndexes : Set[Int],
+                         groupSet: ImmutableBitSet) = {
 
     val aggsWithIndexes = agg.getAggCallList.zipWithIndex
 

@@ -75,6 +75,7 @@ trait BatchTableEnvironment extends TableEnvironment {
     * @return The converted [[Table]].
     */
   def fromDataSet[T](dataSet: DataSet[T]): Table
+  def fromDataSet[T](location: String, dataSet: DataSet[T]): Table
 
   /**
     * Converts the given [[DataSet]] into a [[Table]] with specified field names.
@@ -92,6 +93,7 @@ trait BatchTableEnvironment extends TableEnvironment {
     * @return The converted [[Table]].
     */
   def fromDataSet[T](dataSet: DataSet[T], fields: Expression*): Table
+  def fromDataSet[T](location: String, dataSet: DataSet[T], fields: Expression*): Table
 
   /**
     * Registers the given [[DataSet]] as table in the

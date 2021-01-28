@@ -38,6 +38,9 @@ public class AggregateQueryOperation implements QueryOperation {
 	private final List<ResolvedExpression> aggregateExpressions;
 	private final QueryOperation child;
 	private final TableSchema tableSchema;
+	private String location;
+	public String getLocation(){return location;}
+	public void setLocation(String newLoc){location=newLoc;}
 
 	public AggregateQueryOperation(
 			List<ResolvedExpression> groupingExpressions,
@@ -48,6 +51,17 @@ public class AggregateQueryOperation implements QueryOperation {
 		this.aggregateExpressions = aggregateExpressions;
 		this.child = child;
 		this.tableSchema = tableSchema;
+	}
+	public AggregateQueryOperation(
+		List<ResolvedExpression> groupingExpressions,
+		List<ResolvedExpression> aggregateExpressions,
+		QueryOperation child,
+		TableSchema tableSchema, String location) {
+		this.groupingExpressions = groupingExpressions;
+		this.aggregateExpressions = aggregateExpressions;
+		this.child = child;
+		this.tableSchema = tableSchema;
+		this.location = location;
 	}
 
 	@Override

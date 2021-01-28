@@ -163,7 +163,7 @@ public class JoinOperatorSetsBase<I1, I2> {
 	public class JoinOperatorSetsPredicateBase {
 
 		protected final Keys<I1> keys1;
-		protected String location = "jointemp";
+		protected String location;
 
 		protected JoinOperatorSetsPredicateBase(Keys<I1> keys1) {
 			if (keys1 == null) {

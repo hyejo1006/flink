@@ -253,6 +253,21 @@ case class BatchTableTestUtil(
     t
   }
 
+  def addTable[T: TypeInformation]( location: String,
+    name: String,
+    fields: Expression*)
+  : Table = {
+    val ds = mock(classOf[DataSet[T]])
+    val jDs = mock(classOf[JDataSet[T]])
+    when(ds.javaSet).thenReturn(jDs)
+    val typeInfo: TypeInformation[T] = implicitly[TypeInformation[T]]
+    when(jDs.getType).thenReturn(typeInfo)
+
+    val t = ds.toTable(location, tableEnv, fields: _*)
+    tableEnv.registerTable(location, name, t)
+    t
+  }
+
   def addJavaTable[T](typeInfo: TypeInformation[T], name: String, fields: String): Table = {
 
     val jDs = mock(classOf[JDataSet[T]])
@@ -260,6 +275,15 @@ case class BatchTableTestUtil(
 
     val t = javaTableEnv.fromDataSet(jDs, fields)
     javaTableEnv.registerTable(name, t)
+    t
+  }
+  def addJavaTable[T](typeInfo: TypeInformation[T],location:String, name: String, fields: String): Table = {
+
+    val jDs = mock(classOf[JDataSet[T]])
+    when(jDs.getType).thenReturn(typeInfo)
+
+    val t = javaTableEnv.fromDataSet(location, jDs, fields)
+    javaTableEnv.registerTable(location, name, t)
     t
   }
 
@@ -301,6 +325,12 @@ case class BatchTableTestUtil(
     verifyString(expected, optimized)
   }
 
+  def printJavaTable(resultTable: Table): Unit = {
+    val relNode = TableTestUtil.toRelNode(resultTable)
+    val optimized = javaTableEnv.optimizer.optimize(relNode)
+    println(RelOptUtil.toString(optimized))
+  }
+
   def printTable(resultTable: Table): Unit = {
     val relNode = TableTestUtil.toRelNode(resultTable)
     val optimized = tableEnv.optimizer.optimize(relNode)
@@ -313,6 +343,9 @@ case class BatchTableTestUtil(
 
   def explain(resultTable: Table): String = {
     tableEnv.explain(resultTable)
+  }
+  def Javaexplain(resultTable: Table): String = {
+    javaTableEnv.explain(resultTable)
   }
 
   def toRelNode(table: Table): RelNode = {

@@ -20,10 +20,10 @@ package org.apache.flink.table.plan.nodes.logical
 
 import java.util
 
+import org.apache.calcite.rel.core.TableScan
 import org.apache.calcite.plan._
 import org.apache.calcite.prepare.RelOptTableImpl
 import org.apache.calcite.rel.`type`.RelDataType
-import org.apache.calcite.rel.core.TableScan
 import org.apache.calcite.rel.metadata.RelMetadataQuery
 import org.apache.calcite.rel.{RelNode, RelWriter}
 import org.apache.flink.api.java.DataSet
@@ -36,12 +36,21 @@ class FlinkLogicalDataSetScan(
     val catalog: RelOptSchema,
     val dataSet: DataSet[_],
     val fieldIdxs: Array[Int],
-    val schema: RelDataType)
+    val schema: RelDataType, location: String)
   extends TableScan(
     cluster,
     traitSet,
     RelOptTableImpl.create(catalog, schema, List[String]().asJava, null))
   with FlinkLogicalRel {
+
+  var address = location
+  def setAddress(newLoc: String) ={
+    address = newLoc
+    super.setLocation(address)
+  }
+  def getAddress:String=address
+
+
 
 
   override def estimateRowCount(mq: RelMetadataQuery): Double = 1000L
@@ -49,7 +58,7 @@ class FlinkLogicalDataSetScan(
   override def deriveRowType(): RelDataType = schema
 
   override def copy(traitSet: RelTraitSet, inputs: util.List[RelNode]): RelNode = {
-    new FlinkLogicalDataSetScan(cluster, traitSet, catalog, dataSet, fieldIdxs, schema)
+    new FlinkLogicalDataSetScan(cluster, traitSet, catalog, dataSet, fieldIdxs, schema, location)
   }
 
   override def computeSelfCost(planner: RelOptPlanner, metadata: RelMetadataQuery): RelOptCost = {

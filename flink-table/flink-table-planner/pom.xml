@@ -102,12 +102,7 @@ under the License.
 			<groupId>org.apache.flink</groupId>
 			<artifactId>flink-sql-parser</artifactId>
 			<version>${project.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.apache.calcite</groupId>
-					<artifactId>calcite-core</artifactId>
-				</exclusion>
-			</exclusions>
+
 		</dependency>
 
 		<dependency>
@@ -144,66 +139,66 @@ under the License.
 		</dependency>
 
 		<!-- Used for translation of table programs -->
-		<dependency>
-			<groupId>org.apache.calcite</groupId>
-			<artifactId>calcite-core</artifactId>
-			<!-- When updating the Calcite version, make sure to update the dependency exclusions -->
-			<version>1.20.0</version>
-			<exclusions>
-				<!--
-				"mvn dependency:tree" as of Calcite 1.20:
+<!--		<dependency>-->
+<!--			<groupId>org.apache.calcite</groupId>-->
+<!--			<artifactId>calcite-core</artifactId>-->
+<!--			&lt;!&ndash; When updating the Calcite version, make sure to update the dependency exclusions &ndash;&gt;-->
+<!--			<version>1.20.0</version>-->
+<!--			<exclusions>-->
+<!--				&lt;!&ndash;-->
+<!--				"mvn dependency:tree" as of Calcite 1.20:-->
 
-				[INFO] +- org.apache.calcite:calcite-core:jar:1.20.0:compile
-				[INFO] |  +- commons-codec:commons-codec:jar:1.10:compile
-				[INFO] |  +- org.apache.calcite.avatica:avatica-core:jar:1.15.0:compile
-				[INFO] |  +- org.apache.calcite:calcite-linq4j:jar:1.20.0:compile
-				[INFO] |  +- org.apache.commons:commons-lang3:jar:3.3.2:compile
-				[INFO] |  +- com.fasterxml.jackson.core:jackson-core:jar:2.9.6:compile
-				[INFO] |  +- com.fasterxml.jackson.core:jackson-annotations:jar:2.9.6:compile
-				[INFO] |  +- com.fasterxml.jackson.core:jackson-databind:jar:2.9.6:compile
-				[INFO] |  +- com.google.guava:guava:jar:19.0:compile
-				[INFO] |  \- com.jayway.jsonpath:json-path:jar:2.4.0:compile
+<!--				[INFO] +- org.apache.calcite:calcite-core:jar:1.20.0:compile-->
+<!--				[INFO] |  +- commons-codec:commons-codec:jar:1.10:compile-->
+<!--				[INFO] |  +- org.apache.calcite.avatica:avatica-core:jar:1.15.0:compile-->
+<!--				[INFO] |  +- org.apache.calcite:calcite-linq4j:jar:1.20.0:compile-->
+<!--				[INFO] |  +- org.apache.commons:commons-lang3:jar:3.3.2:compile-->
+<!--				[INFO] |  +- com.fasterxml.jackson.core:jackson-core:jar:2.9.6:compile-->
+<!--				[INFO] |  +- com.fasterxml.jackson.core:jackson-annotations:jar:2.9.6:compile-->
+<!--				[INFO] |  +- com.fasterxml.jackson.core:jackson-databind:jar:2.9.6:compile-->
+<!--				[INFO] |  +- com.google.guava:guava:jar:19.0:compile-->
+<!--				[INFO] |  \- com.jayway.jsonpath:json-path:jar:2.4.0:compile-->
 
-				Dependencies that are not needed for how we use Calcite right now.
-				-->
-				<exclusion>
-					<groupId>org.apache.calcite.avatica</groupId>
-					<artifactId>avatica-metrics</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.google.protobuf</groupId>
-					<artifactId>protobuf-java</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.httpcomponents</groupId>
-					<artifactId>httpclient</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.httpcomponents</groupId>
-					<artifactId>httpcore</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.commons</groupId>
-					<artifactId>commons-dbcp2</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.esri.geometry</groupId>
-					<artifactId>esri-geometry-api</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.fasterxml.jackson.dataformat</groupId>
-					<artifactId>jackson-dataformat-yaml</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.yahoo.datasketches</groupId>
-					<artifactId>sketches-core</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>net.hydromatic</groupId>
-					<artifactId>aggdesigner-algorithm</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
+<!--				Dependencies that are not needed for how we use Calcite right now.-->
+<!--				&ndash;&gt;-->
+<!--				<exclusion>-->
+<!--					<groupId>org.apache.calcite.avatica</groupId>-->
+<!--					<artifactId>avatica-metrics</artifactId>-->
+<!--				</exclusion>-->
+<!--				<exclusion>-->
+<!--					<groupId>com.google.protobuf</groupId>-->
+<!--					<artifactId>protobuf-java</artifactId>-->
+<!--				</exclusion>-->
+<!--				<exclusion>-->
+<!--					<groupId>org.apache.httpcomponents</groupId>-->
+<!--					<artifactId>httpclient</artifactId>-->
+<!--				</exclusion>-->
+<!--				<exclusion>-->
+<!--					<groupId>org.apache.httpcomponents</groupId>-->
+<!--					<artifactId>httpcore</artifactId>-->
+<!--				</exclusion>-->
+<!--				<exclusion>-->
+<!--					<groupId>org.apache.commons</groupId>-->
+<!--					<artifactId>commons-dbcp2</artifactId>-->
+<!--				</exclusion>-->
+<!--				<exclusion>-->
+<!--					<groupId>com.esri.geometry</groupId>-->
+<!--					<artifactId>esri-geometry-api</artifactId>-->
+<!--				</exclusion>-->
+<!--				<exclusion>-->
+<!--					<groupId>com.fasterxml.jackson.dataformat</groupId>-->
+<!--					<artifactId>jackson-dataformat-yaml</artifactId>-->
+<!--				</exclusion>-->
+<!--				<exclusion>-->
+<!--					<groupId>com.yahoo.datasketches</groupId>-->
+<!--					<artifactId>sketches-core</artifactId>-->
+<!--				</exclusion>-->
+<!--				<exclusion>-->
+<!--					<groupId>net.hydromatic</groupId>-->
+<!--					<artifactId>aggdesigner-algorithm</artifactId>-->
+<!--				</exclusion>-->
+<!--			</exclusions>-->
+<!--		</dependency>-->
 
 		<!-- Used for date/time formatting -->
 		<dependency>
@@ -265,6 +260,81 @@ under the License.
 			<version>${project.version}</version>
 			<scope>test</scope>
 			<type>test-jar</type>
+		</dependency>
+        <dependency>
+            <groupId>com.esri.geometry</groupId>
+            <artifactId>esri-geometry-api</artifactId>
+            <version>2.0.0</version>
+        </dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.dataformat</groupId>
+			<artifactId>jackson-dataformat-yaml</artifactId>
+			<version>2.10.1</version>
+		</dependency>
+		<dependency>
+			<groupId>net.hydromatic</groupId>
+			<artifactId>aggdesigner-algorithm</artifactId>
+			<version>6.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-dbcp2</artifactId>
+			<version>2.6.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.yahoo.datasketches</groupId>
+			<artifactId>sketches-core</artifactId>
+			<version>0.9.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.jayway.jsonpath</groupId>
+			<artifactId>json-path</artifactId>
+			<version>2.4.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.calcite</groupId>
+			<artifactId>calcite-linq4j</artifactId>
+			<version>1.20.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.testng</groupId>
+			<artifactId>testng</artifactId>
+			<version>6.13.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+			<version>2.9.6</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.9.6</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+			<version>2.9.6</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+			<version>1.10</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.3.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.calcite.avatica</groupId>
+			<artifactId>avatica-core</artifactId>
+			<version>1.15.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>19.0</version>
 		</dependency>
 	</dependencies>
 

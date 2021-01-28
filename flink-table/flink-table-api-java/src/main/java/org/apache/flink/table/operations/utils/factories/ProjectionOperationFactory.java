@@ -62,6 +62,9 @@ public final class ProjectionOperationFactory {
 	private final TransitiveExtractNameVisitor extractTransitiveNameVisitor = new TransitiveExtractNameVisitor();
 	private final StripAliases stripAliases = new StripAliases();
 	private int currentFieldIndex = 0;
+	private String location;
+	public String getLocation(){return location;}
+	public void setLocation(String newLoc){location = newLoc;}
 
 	public QueryOperation create(
 			List<ResolvedExpression> projectList,
@@ -90,6 +93,35 @@ public final class ProjectionOperationFactory {
 		TableSchema tableSchema = TableSchema.builder().fields(fieldNames, fieldTypes).build();
 
 		return new ProjectQueryOperation(finalExpression, child, tableSchema);
+	}
+
+	public QueryOperation create(
+		List<ResolvedExpression> projectList,
+		QueryOperation child,
+		boolean explicitAlias,
+		ExpressionResolver.PostResolverFactory postResolverFactory, String location) {
+
+		final NamingVisitor namingVisitor = new NamingVisitor(postResolverFactory);
+
+		final List<ResolvedExpression> namedExpressions = nameExpressions(namingVisitor, projectList);
+		String[] fieldNames = validateAndGetUniqueNames(namedExpressions);
+
+		final List<ResolvedExpression> finalExpression;
+		if (explicitAlias) {
+			finalExpression = namedExpressions;
+		} else {
+			finalExpression = namedExpressions.stream()
+				.map(expr -> expr.accept(stripAliases))
+				.collect(Collectors.toList());
+		}
+
+		DataType[] fieldTypes = namedExpressions.stream()
+			.map(ResolvedExpression::getOutputDataType)
+			.toArray(DataType[]::new);
+
+		TableSchema tableSchema = TableSchema.builder().fields(fieldNames, fieldTypes).build();
+
+		return new ProjectQueryOperation(finalExpression, child, tableSchema, location);
 	}
 
 	private String[] validateAndGetUniqueNames(List<ResolvedExpression> namedExpressions) {

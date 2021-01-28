@@ -43,7 +43,7 @@ class DataSetScanRule
       scan.dataSet,
       scan.fieldIdxs,
       scan.schema,
-      "testAddress"
+      scan.getAddress
     )
   }
 }

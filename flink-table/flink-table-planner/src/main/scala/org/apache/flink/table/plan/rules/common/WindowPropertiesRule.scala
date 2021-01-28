@@ -18,9 +18,10 @@
 
 package org.apache.flink.table.plan.rules.common
 
+import org.apache.calcite.rel.logical.LogicalProject
 import org.apache.calcite.plan.{RelOptRule, RelOptRuleCall, RelOptRuleOperand}
 import org.apache.calcite.rel.RelNode
-import org.apache.calcite.rel.logical.{LogicalFilter, LogicalProject}
+import org.apache.calcite.rel.logical.LogicalFilter
 import org.apache.calcite.rex.{RexCall, RexNode}
 import org.apache.calcite.tools.RelBuilder
 import org.apache.flink.table.api.{TableException, Types, ValidationException}

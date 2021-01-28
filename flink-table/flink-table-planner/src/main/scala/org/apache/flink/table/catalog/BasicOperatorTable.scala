@@ -1,21 +1,3 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.apache.flink.table.catalog
 
 import org.apache.flink.table.calcite.FlinkTypeFactory
@@ -36,10 +18,10 @@ import _root_.scala.collection.JavaConversions._
 class BasicOperatorTable extends ReflectiveSqlOperatorTable {
 
   /**
-    * List of supported SQL operators / functions.
-    *
-    * This list should be kept in sync with [[SqlStdOperatorTable]].
-    */
+   * List of supported SQL operators / functions.
+   *
+   * This list should be kept in sync with [[SqlStdOperatorTable]].
+   */
   private val builtInSqlOperators: Seq[SqlOperator] = Seq(
     // SET OPERATORS
     SqlStdOperatorTable.UNION,
@@ -242,11 +224,11 @@ class BasicOperatorTable extends ReflectiveSqlOperatorTable {
   builtInSqlOperators.foreach(register)
 
   override def lookupOperatorOverloads(
-      opName: SqlIdentifier,
-      category: SqlFunctionCategory,
-      syntax: SqlSyntax,
-      operatorList: util.List[SqlOperator],
-      nameMatcher: SqlNameMatcher): Unit = {
+                                        opName: SqlIdentifier,
+                                        category: SqlFunctionCategory,
+                                        syntax: SqlSyntax,
+                                        operatorList: util.List[SqlOperator],
+                                        nameMatcher: SqlNameMatcher): Unit = {
     // set caseSensitive=false to make sure the behavior is same with before.
     super.lookupOperatorOverloads(
       opName, category, syntax, operatorList, SqlNameMatchers.withCaseSensitive(false))
@@ -256,8 +238,8 @@ class BasicOperatorTable extends ReflectiveSqlOperatorTable {
 object BasicOperatorTable {
 
   /**
-    * We need custom group auxiliary functions in order to support nested windows.
-    */
+   * We need custom group auxiliary functions in order to support nested windows.
+   */
 
   val TUMBLE: SqlGroupedWindowFunction = new SqlGroupedWindowFunction(
     SqlKind.TUMBLE,

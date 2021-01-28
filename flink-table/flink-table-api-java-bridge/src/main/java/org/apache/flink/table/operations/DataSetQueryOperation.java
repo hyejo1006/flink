@@ -20,6 +20,7 @@ package org.apache.flink.table.operations;
 
 import org.apache.flink.annotation.Internal;
 import org.apache.flink.api.java.DataSet;
+import org.apache.flink.api.java.operators.MapOperator;
 import org.apache.flink.table.api.TableSchema;
 
 import java.util.Collections;
@@ -38,9 +39,10 @@ import java.util.Map;
 @Internal
 public class DataSetQueryOperation<E> implements QueryOperation {
 
-	private final DataSet<E> dataSet;
+	private DataSet<E> dataSet;
 	private final int[] fieldIndices;
 	private final TableSchema tableSchema;
+	private String location;
 
 	public DataSetQueryOperation(
 			DataSet<E> dataSet,
@@ -51,9 +53,22 @@ public class DataSetQueryOperation<E> implements QueryOperation {
 		this.fieldIndices = fieldIndices;
 	}
 
+	public DataSetQueryOperation(
+		DataSet<E> dataSet,
+		int[] fieldIndices,
+		TableSchema tableSchema, String location) {
+		this.dataSet = dataSet;
+		this.tableSchema = tableSchema;
+		this.fieldIndices = fieldIndices;
+		this.location = location;
+	}
+	public String getLocation(){return location;}
+	public void setLocation(String newLoc){location=newLoc;}
+
 	public DataSet<E> getDataSet() {
 		return dataSet;
 	}
+	public void setDataSet(MapOperator newdata){this.dataSet = newdata;}
 
 	public int[] getFieldIndices() {
 		return fieldIndices;
@@ -79,6 +94,11 @@ public class DataSetQueryOperation<E> implements QueryOperation {
 
 	@Override
 	public <T> T accept(QueryOperationVisitor<T> visitor) {
+		if (dataSet instanceof MapOperator) {
+			MapOperator mapOperator = (MapOperator)getDataSet();
+			mapOperator.setLoc(this.location);
+			setDataSet(mapOperator);
+		}
 		return visitor.visit(this);
 	}
 }

@@ -19,21 +19,33 @@
 package org.apache.flink.table.calcite
 
 import java.lang.Iterable
-import java.util.{List => JList}
+import java.util
 
+import org.apache.calcite.rel.logical.{LogicalAggregate, LogicalTableScan}
+import org.apache.calcite.rex.RexNode
+//import scala.collection.Iterable
+
+
+import com.google.common.collect.ImmutableList
 import org.apache.calcite.plan._
-import org.apache.calcite.rel.logical.LogicalAggregate
+import org.apache.calcite.rel.RelNode
+import org.apache.calcite.rel.core.RelFactories
 import org.apache.calcite.tools.RelBuilder
 import org.apache.calcite.tools.RelBuilder.{AggCall, GroupKey}
+import org.apache.calcite.util.Static.RESOURCE
+import org.apache.calcite.util.Util
 import org.apache.flink.table.api.TableException
 import org.apache.flink.table.expressions.{Alias, ExpressionBridge, PlannerExpression, WindowProperty}
 import org.apache.flink.table.operations.QueryOperation
 import org.apache.flink.table.plan.QueryOperationConverter
 import org.apache.flink.table.plan.logical.LogicalWindow
 import org.apache.flink.table.plan.logical.rel.{LogicalTableAggregate, LogicalWindowAggregate, LogicalWindowTableAggregate}
+import org.apache.flink.table.plan.nodes.FlinkRelNode
+import org.apache.flink.table.plan.nodes.dataset.DataSetScan
 import org.apache.flink.table.runtime.aggregate.AggregateUtil
 
 import scala.collection.JavaConverters._
+import scala.tools.nsc.interpreter.JList
 
 /**
   * Flink specific [[RelBuilder]] that changes the default type factory to a [[FlinkTypeFactory]].
@@ -52,6 +64,8 @@ class FlinkRelBuilder(
 
   def getRelOptSchema: RelOptSchema = relOptSchema
 
+
+
   def getPlanner: RelOptPlanner = cluster.getPlanner
 
   def getCluster: RelOptCluster = relOptCluster
@@ -60,6 +74,24 @@ class FlinkRelBuilder(
 
   override def getTypeFactory: FlinkTypeFactory =
     super.getTypeFactory.asInstanceOf[FlinkTypeFactory]
+
+  var scanFactory = Util.first(context.unwrap(classOf[RelFactories.TableScanFactory]), RelFactories.DEFAULT_TABLE_SCAN_FACTORY)
+
+  def scan(tableNames: Iterable[String], location: String): RelBuilder = {
+    val names: util.List[String] = ImmutableList.copyOf(tableNames)
+    val relOptTable: RelOptTable = relOptSchema.getTableForMember(names)
+    if (relOptTable == null) throw RESOURCE.tableNotFound(String.join(".", names)).ex
+    val scan: RelNode = scanFactory.createScan(cluster, relOptTable)
+    scan.asInstanceOf[LogicalTableScan].setLocation(location);
+    push(scan)
+    rename(relOptTable.getRowType.getFieldNames)
+    this
+  }
+
+
+
+
+
 
   /**
     * Build non-window aggregate for either aggregate or table aggregate.

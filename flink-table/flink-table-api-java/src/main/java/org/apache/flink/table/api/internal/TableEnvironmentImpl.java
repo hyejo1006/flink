@@ -192,6 +192,16 @@ public class TableEnvironmentImpl implements TableEnvironment {
 		CatalogBaseTable tableTable = new QueryOperationCatalogView(table.getQueryOperation());
 		registerTableInternal(name, tableTable);
 	}
+	@Override
+	public void registerTable(String location,String name, Table table) {
+		if (((TableImpl) table).getTableEnvironment() != this) {
+			throw new TableException(
+				"Only tables that belong to this TableEnvironment can be registered.");
+		}
+
+		CatalogBaseTable tableTable = new QueryOperationCatalogView(location, table.getQueryOperation());
+		registerTableInternal(name, tableTable);
+	}
 
 	@Override
 	public void registerTableSource(String name, TableSource<?> tableSource) {
@@ -226,6 +236,18 @@ public class TableEnvironmentImpl implements TableEnvironment {
 			.orElseThrow(() -> new ValidationException(String.format(
 				"Table '%s' was not found.",
 				String.join(".", tablePath))));
+	}
+	@Override
+	public Table scan(String location, String tablePath) {
+		return scanInternal(location, tablePath).map(this::createTable)
+			.orElseThrow(() -> new ValidationException(String.format(
+				"Table '%s' was not found.",
+				String.join(".", tablePath))));
+	}
+
+	private Optional<CatalogQueryOperation> scanInternal(String location, String tablePath) {
+		return catalogManager.resolveTable(location, tablePath)
+			.map(t -> new CatalogQueryOperation(t.getTablePath(), t.getTableSchema()));
 	}
 
 	private Optional<CatalogQueryOperation> scanInternal(String... tablePath) {

@@ -30,9 +30,15 @@ import java.util.Optional;
 @Internal
 public class QueryOperationCatalogView extends AbstractCatalogView {
 	private final QueryOperation queryOperation;
+	private String location;
+	public String getLocation(){return location;}
+	public void setLocation(String newLoc){location=newLoc;}
 
 	public QueryOperationCatalogView(QueryOperation queryOperation) {
 		this(queryOperation, "");
+	}
+	public QueryOperationCatalogView(String location, QueryOperation queryOperation) {
+		this(location, queryOperation, "");
 	}
 
 	public QueryOperationCatalogView(QueryOperation queryOperation, String comment) {
@@ -43,6 +49,16 @@ public class QueryOperationCatalogView extends AbstractCatalogView {
 			new HashMap<>(),
 			comment);
 		this.queryOperation = queryOperation;
+	}
+	public QueryOperationCatalogView(String location, QueryOperation queryOperation, String comment) {
+		super(location,
+			queryOperation.asSummaryString(),
+			queryOperation.asSummaryString(),
+			queryOperation.getTableSchema(),
+			new HashMap<>(),
+			comment);
+		this.queryOperation = queryOperation;
+		this.location=location;
 	}
 
 	public QueryOperation getQueryOperation() {

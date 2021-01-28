@@ -18,12 +18,13 @@
 
 package org.apache.flink.table.plan.nodes.logical
 
+import org.apache.calcite.rel.core
+import org.apache.calcite.rel.logical.LogicalJoin
 import org.apache.calcite.plan._
 import org.apache.calcite.plan.volcano.RelSubset
 import org.apache.calcite.rel.RelNode
 import org.apache.calcite.rel.convert.ConverterRule
 import org.apache.calcite.rel.core._
-import org.apache.calcite.rel.logical.LogicalJoin
 import org.apache.calcite.rex.RexNode
 import org.apache.flink.table.plan.nodes.FlinkConventions
 
@@ -33,7 +34,7 @@ class FlinkLogicalJoin(
     left: RelNode,
     right: RelNode,
     condition: RexNode,
-    joinType: JoinRelType)
+    joinType: JoinRelType, location: String)
   extends FlinkLogicalJoinBase(
     cluster,
     traitSet,
@@ -41,6 +42,13 @@ class FlinkLogicalJoin(
     right,
     condition,
     joinType) {
+
+  var address = location
+  def setAddress(newLoc: String) ={
+    address = newLoc
+    super.setLocation(address)
+  }
+  def getAddress:String=address
 
   override def copy(
       traitSet: RelTraitSet,
@@ -50,7 +58,7 @@ class FlinkLogicalJoin(
       joinType: JoinRelType,
       semiJoinDone: Boolean): Join = {
 
-    new FlinkLogicalJoin(cluster, traitSet, left, right, conditionExpr, joinType)
+    new FlinkLogicalJoin(cluster, traitSet, left, right, conditionExpr, joinType, address)
   }
 }
 
@@ -80,7 +88,7 @@ private class FlinkLogicalJoinConverter
       newLeft,
       newRight,
       join.getCondition,
-      join.getJoinType)
+      join.getJoinType, join.getLocation())
   }
 
   private def hasEqualityPredicates(joinInfo: JoinInfo): Boolean = {
@@ -104,10 +112,10 @@ private class FlinkLogicalJoinConverter
   private def isSingleRow(node: RelNode): Boolean = {
     node match {
       case ss: RelSubset => isSingleRow(ss.getOriginal)
-      case lp: Project => isSingleRow(lp.getInput)
+      case lp: core.Project => isSingleRow(lp.getInput)
       case lf: Filter => isSingleRow(lf.getInput)
-      case lc: Calc => isSingleRow(lc.getInput)
-      case la: Aggregate => la.getGroupSet.isEmpty
+      case lc: core.Calc => isSingleRow(lc.getInput)
+      case la: core.Aggregate => la.getGroupSet.isEmpty
       case _ => false
     }
   }

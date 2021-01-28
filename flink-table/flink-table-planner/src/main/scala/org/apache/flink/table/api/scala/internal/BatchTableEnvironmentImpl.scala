@@ -48,17 +48,24 @@ class BatchTableEnvironmentImpl(
   override def fromDataSet[T](dataSet: DataSet[T]): Table = {
     createTable(asQueryOperation(dataSet.javaSet, None))
   }
+  override def fromDataSet[T](location: String, dataSet: DataSet[T]): Table = {
+    createTable(asQueryOperation(location, dataSet.javaSet, None), location)
+  }
 
   override def fromDataSet[T](dataSet: DataSet[T], fields: Expression*): Table = {
     createTable(asQueryOperation(dataSet.javaSet, Some(fields.toArray)))
   }
 
+  override def fromDataSet[T](location: String, dataSet: DataSet[T], fields: Expression*): Table = {
+    createTable(asQueryOperation(location, dataSet.javaSet, Some(fields.toArray)), location)
+  }
+
   override def registerDataSet[T](name: String, dataSet: DataSet[T]): Unit = {
-    registerTable(name, fromDataSet(dataSet))
+    registerTable("registerdataset", name, fromDataSet(dataSet))
   }
 
   override def registerDataSet[T](name: String, dataSet: DataSet[T], fields: Expression*): Unit = {
-    registerTable(name, fromDataSet(dataSet, fields: _*))
+    registerTable("resisterdataset2", name, fromDataSet(dataSet, fields: _*))
   }
 
   override def toDataSet[T: TypeInformation](table: Table): DataSet[T] = {

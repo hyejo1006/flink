@@ -49,6 +49,9 @@ class BatchTableEnvironmentImpl(
   override def fromDataSet[T](dataSet: DataSet[T]): Table = {
     createTable(asQueryOperation(dataSet, None))
   }
+  override def fromDataSet[T](location: String, dataSet: DataSet[T]): Table = {
+    createTable(asQueryOperation(location, dataSet, None), location)
+  }
 
   override def fromDataSet[T](dataSet: DataSet[T], fields: String): Table = {
     val exprs = ExpressionParser
@@ -56,6 +59,13 @@ class BatchTableEnvironmentImpl(
       .toArray
 
     createTable(asQueryOperation(dataSet, Some(exprs)))
+  }
+  override def fromDataSet[T](location: String, dataSet: DataSet[T], fields: String): Table = {
+    val exprs = ExpressionParser
+      .parseExpressionList(fields).asScala
+      .toArray
+
+    createTable(asQueryOperation(location, dataSet, Some(exprs)), location)
   }
 
   override def registerDataSet[T](name: String, dataSet: DataSet[T]): Unit = {

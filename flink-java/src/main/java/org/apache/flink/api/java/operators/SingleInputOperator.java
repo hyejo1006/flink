@@ -51,6 +51,11 @@ public abstract class SingleInputOperator<IN, OUT, O extends SingleInputOperator
 	 */
 
 	public String getLocation(){return this.location;}
+	public void setLoc(String newLoc){
+		location=newLoc;
+		super.setLoc(newLoc);
+		super.setLocation(newLoc);
+	}
 
 	public DataSet<IN> getInput() {
 		return this.input;

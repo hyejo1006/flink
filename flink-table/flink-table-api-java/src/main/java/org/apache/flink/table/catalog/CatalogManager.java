@@ -66,6 +66,7 @@ public class CatalogManager {
 
 	// The name of the built-in catalog
 	private final String builtInCatalogName;
+	private String location = "catalogmanager";
 
 	/**
 	 * Temporary solution to handle both {@link CatalogBaseTable} and
@@ -76,6 +77,7 @@ public class CatalogManager {
 		private final CatalogBaseTable catalogTable;
 		private final TableSchema tableSchema;
 		private final List<String> tablePath;
+		private String location = "resolvedtable";
 
 		static ResolvedTable externalTable(
 				List<String> tablePath,
@@ -83,11 +85,23 @@ public class CatalogManager {
 				TableSchema tableSchema) {
 			return new ResolvedTable(table, null, tableSchema, tablePath);
 		}
+		static ResolvedTable externalTable(
+			List<String> tablePath,
+			ExternalCatalogTable table,
+			TableSchema tableSchema, String location) {
+			return new ResolvedTable(table, null, tableSchema, tablePath, location);
+		}
 
 		static ResolvedTable catalogTable(
 				List<String> tablePath,
 				CatalogBaseTable table) {
 			return new ResolvedTable(null, table, table.getSchema(), tablePath);
+		}
+
+		static ResolvedTable catalogTable(
+			List<String> tablePath,
+			CatalogBaseTable table, String location) {
+			return new ResolvedTable(null, table, table.getSchema(), tablePath, location);
 		}
 
 		private ResolvedTable(
@@ -99,6 +113,18 @@ public class CatalogManager {
 			this.catalogTable = catalogTable;
 			this.tableSchema = tableSchema;
 			this.tablePath = tablePath;
+		}
+
+		private ResolvedTable(
+			ExternalCatalogTable externalCatalogTable,
+			CatalogBaseTable catalogTable,
+			TableSchema tableSchema,
+			List<String> tablePath, String location) {
+			this.externalCatalogTable = externalCatalogTable;
+			this.catalogTable = catalogTable;
+			this.tableSchema = tableSchema;
+			this.tablePath = tablePath;
+			this.location = location;
 		}
 
 		public Optional<ExternalCatalogTable> getExternalCatalogTable() {
@@ -115,6 +141,10 @@ public class CatalogManager {
 
 		public List<String> getTablePath() {
 			return tablePath;
+		}
+
+		public String getLocation() {
+			return location;
 		}
 	}
 
@@ -354,6 +384,44 @@ public class CatalogManager {
 		return Optional.empty();
 	}
 
+	public Optional<ResolvedTable> resolveTable(String location,boolean hasLoc, String... tablePath) {
+		checkArgument(tablePath != null && tablePath.length != 0, "Table path must not be null or empty.");
+
+		List<String> userPath = asList(tablePath);
+		this.location = location;
+
+		List<List<String>> prefixes = asList(
+			asList(currentCatalogName, currentDatabaseName),
+			singletonList(currentCatalogName),
+			emptyList()
+		);
+
+		for (List<String> prefix : prefixes) {
+			Optional<ResolvedTable> potentialTable = lookupPath(prefix, userPath, this.location);
+			if (potentialTable.isPresent()) {
+				return potentialTable;
+			}
+		}
+
+		return Optional.empty();
+	}
+
+	private Optional<ResolvedTable> lookupPath(List<String> prefix, List<String> userPath, String location) {
+		try {
+			List<String> path = new ArrayList<>(prefix);
+			path.addAll(userPath);
+
+			Optional<ResolvedTable> potentialTable = lookupCatalogTable(path, location);
+
+			if (!potentialTable.isPresent()) {
+				potentialTable = lookupExternalTable(path, location);
+			}
+			return potentialTable;
+		} catch (TableNotExistException e) {
+			return Optional.empty();
+		}
+	}
+
 	private Optional<ResolvedTable> lookupPath(List<String> prefix, List<String> userPath) {
 		try {
 			List<String> path = new ArrayList<>(prefix);
@@ -381,6 +449,24 @@ public class CatalogManager {
 				CatalogBaseTable table = currentCatalog.getTable(objectPath);
 				return Optional.of(ResolvedTable.catalogTable(
 					asList(path.get(0), currentDatabaseName, tableName),
+					table, location));
+			}
+		}
+
+		return Optional.empty();
+	}
+
+	private Optional<ResolvedTable> lookupCatalogTable(List<String> path, String location) throws TableNotExistException {
+		if (path.size() == 3) {
+			Catalog currentCatalog = catalogs.get(path.get(0));
+			String currentDatabaseName = path.get(1);
+			String tableName = String.join(".", path.subList(2, path.size()));
+			ObjectPath objectPath = new ObjectPath(currentDatabaseName, tableName);
+
+			if (currentCatalog != null && currentCatalog.tableExists(objectPath)) {
+				CatalogBaseTable table = currentCatalog.getTable(objectPath);
+				return Optional.of(ResolvedTable.catalogTable(
+					asList(path.get(0), currentDatabaseName, tableName),
 					table));
 			}
 		}
@@ -394,6 +480,13 @@ public class CatalogManager {
 			.flatMap(externalCatalog -> extractPath(externalCatalog, path.subList(1, path.size() - 1)))
 			.map(finalCatalog -> finalCatalog.getTable(path.get(path.size() - 1)))
 			.map(table -> ResolvedTable.externalTable(path, table, getTableSchema(table)));
+	}
+	private Optional<ResolvedTable> lookupExternalTable(List<String> path, String location) {
+		ExternalCatalog currentCatalog = externalCatalogs.get(path.get(0));
+		return Optional.ofNullable(currentCatalog)
+			.flatMap(externalCatalog -> extractPath(externalCatalog, path.subList(1, path.size() - 1)))
+			.map(finalCatalog -> finalCatalog.getTable(path.get(path.size() - 1)))
+			.map(table -> ResolvedTable.externalTable(path, table, getTableSchema(table), location));
 	}
 
 	private Optional<ExternalCatalog> extractPath(ExternalCatalog rootExternalCatalog, List<String> path) {

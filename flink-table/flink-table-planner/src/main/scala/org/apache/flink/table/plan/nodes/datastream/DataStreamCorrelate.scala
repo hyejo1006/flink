@@ -17,6 +17,7 @@
  */
 package org.apache.flink.table.plan.nodes.datastream
 
+import org.apache.calcite.rel.SingleRel
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.streaming.api.datastream.DataStream
 import org.apache.flink.streaming.api.functions.ProcessFunction
@@ -28,10 +29,9 @@ import org.apache.flink.table.plan.schema.RowSchema
 import org.apache.flink.table.planner.StreamPlanner
 import org.apache.flink.table.runtime.CRowCorrelateProcessRunner
 import org.apache.flink.table.runtime.types.{CRow, CRowTypeInfo}
-
 import org.apache.calcite.plan.{RelOptCluster, RelTraitSet}
 import org.apache.calcite.rel.core.JoinRelType
-import org.apache.calcite.rel.{RelNode, RelWriter, SingleRel}
+import org.apache.calcite.rel.{RelNode, RelWriter}
 import org.apache.calcite.rex.{RexCall, RexNode}
 
 /**

@@ -36,6 +36,7 @@ import org.apache.flink.table.expressions.{Expression, UnresolvedCallExpression}
 import org.apache.flink.table.functions.BuiltInFunctionDefinitions.TIME_ATTRIBUTES
 import org.apache.flink.table.operations.DataSetQueryOperation
 import org.apache.flink.table.plan.BatchOptimizer
+import org.apache.flink.table.plan.nodes.FlinkRelNode
 import org.apache.flink.table.plan.nodes.dataset.DataSetRel
 import org.apache.flink.table.planner.Conversions
 import org.apache.flink.table.runtime.MapRunner
@@ -207,6 +208,10 @@ abstract class BatchTableEnvImpl(
     val jasonSqlPlan = env.getExecutionPlan
     val sqlPlan = PlanJsonParser.getSqlExecutionPlan(jasonSqlPlan, extended)
 
+    ///////
+    println(RelOptUtil.toString(ast))
+    println(RelOptUtil.toString(optimizedPlan))
+    println(sqlPlan)
     s"== Abstract Syntax Tree ==" +
       s"== This is a batchtable test ==" +
         System.lineSeparator +
@@ -245,6 +250,24 @@ abstract class BatchTableEnvImpl(
       dataSet,
       fieldsInfo.getIndices,
       fieldsInfo.toTableSchema)
+    tableOperation
+  }
+  protected def asQueryOperation[T](location: String, dataSet: DataSet[T], fields: Option[Array[Expression]])
+  : DataSetQueryOperation[T] = {
+    val inputType = dataSet.getType
+
+    val fieldsInfo = fields match {
+      case Some(f) =>
+        checkNoTimeAttributes(f)
+        getFieldsInfo[T](inputType, f)
+
+      case None => getFieldsInfo[T](inputType)
+    }
+
+    val tableOperation = new DataSetQueryOperation[T](
+      dataSet,
+      fieldsInfo.getIndices,
+      fieldsInfo.toTableSchema, location)
     tableOperation
   }
 

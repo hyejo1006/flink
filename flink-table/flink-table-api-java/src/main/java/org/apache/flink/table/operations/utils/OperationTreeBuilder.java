@@ -147,6 +147,14 @@ public final class OperationTreeBuilder {
 			"Window properties can only be used on windowed tables.")));
 		return projectInternal(projectList, child, explicitAlias, Collections.emptyList());
 	}
+	public QueryOperation project(List<Expression> projectList, QueryOperation child, boolean explicitAlias, String location) {
+		projectList.forEach(p -> p.accept(new NoAggregateChecker(
+			"Aggregate functions are not supported in the select right after the aggregate" +
+				" or flatAggregate operation.")));
+		projectList.forEach(p -> p.accept(new NoWindowPropertyChecker(
+			"Window properties can only be used on windowed tables.")));
+		return projectInternal(projectList, child, explicitAlias, Collections.emptyList(), location);
+	}
 
 	public QueryOperation project(List<Expression> projectList, QueryOperation child, List<OverWindow> overWindows) {
 
@@ -173,6 +181,19 @@ public final class OperationTreeBuilder {
 			.build();
 		List<ResolvedExpression> projections = resolver.resolve(projectList);
 		return projectionOperationFactory.create(projections, child, explicitAlias, resolver.postResolverFactory());
+	}
+
+	private QueryOperation projectInternal(
+		List<Expression> projectList,
+		QueryOperation child,
+		boolean explicitAlias,
+		List<OverWindow> overWindows, String location) {
+
+		ExpressionResolver resolver = ExpressionResolver.resolverFor(tableReferenceLookup, functionCatalog, child)
+			.withOverWindows(overWindows)
+			.build();
+		List<ResolvedExpression> projections = resolver.resolve(projectList);
+		return projectionOperationFactory.create(projections, child, explicitAlias, resolver.postResolverFactory(), location);
 	}
 
 	/**
@@ -220,6 +241,15 @@ public final class OperationTreeBuilder {
 		List<ResolvedExpression> resolvedAggregates = resolver.resolve(aggregates);
 
 		return aggregateOperationFactory.createAggregate(resolvedGroupings, resolvedAggregates, child);
+	}
+	public QueryOperation aggregate(List<Expression> groupingExpressions, List<Expression> aggregates, QueryOperation child, String location) {
+
+		ExpressionResolver resolver = getResolver(child);
+
+		List<ResolvedExpression> resolvedGroupings = resolver.resolve(groupingExpressions);
+		List<ResolvedExpression> resolvedAggregates = resolver.resolve(aggregates);
+
+		return aggregateOperationFactory.createAggregate(resolvedGroupings, resolvedAggregates, child, location);
 	}
 
 	public QueryOperation windowAggregate(
@@ -337,6 +367,23 @@ public final class OperationTreeBuilder {
 			joinType,
 			resolvedCondition.orElse(valueLiteral(true)),
 			correlated);
+	}
+	public QueryOperation join(
+		QueryOperation left,
+		QueryOperation right,
+		JoinType joinType,
+		Optional<Expression> condition,
+		boolean correlated, String location) {
+		ExpressionResolver resolver = ExpressionResolver.resolverFor(tableReferenceLookup, functionCatalog, left, right)
+			.build();
+		Optional<ResolvedExpression> resolvedCondition = condition.map(expr -> resolveSingleExpression(expr, resolver));
+
+		return joinOperationFactory.create(
+			left,
+			right,
+			joinType,
+			resolvedCondition.orElse(valueLiteral(true)),
+			correlated, location);
 	}
 
 	public QueryOperation joinLateral(

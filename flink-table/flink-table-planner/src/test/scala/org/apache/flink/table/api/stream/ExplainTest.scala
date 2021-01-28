@@ -37,7 +37,9 @@ class ExplainTest extends AbstractTestBase {
     val tEnv = StreamTableEnvironment.create(env)
 
     val scan = env.fromElements((1, "hello")).toTable(tEnv, 'a, 'b)
-    val table = scan.filter("a % 2 = 0")
+//    val table = scan.filter("a % 2 = 0")
+    val testtt="18"
+val table = scan.select(testtt,true,'a)
 
     val result = replaceString(tEnv.explain(table))
 

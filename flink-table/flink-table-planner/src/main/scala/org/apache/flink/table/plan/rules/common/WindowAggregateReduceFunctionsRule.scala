@@ -20,10 +20,11 @@ package org.apache.flink.table.plan.rules.common
 
 import java.util
 
+import org.apache.calcite.rel.core.Aggregate
+import org.apache.calcite.rel.logical.LogicalAggregate
 import org.apache.calcite.plan.RelOptRule
 import org.apache.calcite.rel.`type`.RelDataType
-import org.apache.calcite.rel.core.{Aggregate, AggregateCall, RelFactories}
-import org.apache.calcite.rel.logical.LogicalAggregate
+import org.apache.calcite.rel.core.{AggregateCall, RelFactories}
 import org.apache.calcite.rel.rules.AggregateReduceFunctionsRule
 import org.apache.calcite.rex.RexNode
 import org.apache.calcite.tools.RelBuilder

@@ -20,11 +20,12 @@ package org.apache.flink.table.plan.nodes.logical
 
 import java.util.{List => JList}
 
+import org.apache.calcite.rel.core.Aggregate
+import org.apache.calcite.rel.logical.LogicalAggregate
 import org.apache.calcite.plan._
 import org.apache.calcite.rel.RelNode
 import org.apache.calcite.rel.convert.ConverterRule
-import org.apache.calcite.rel.core.{Aggregate, AggregateCall}
-import org.apache.calcite.rel.logical.LogicalAggregate
+import org.apache.calcite.rel.core.AggregateCall
 import org.apache.calcite.rel.metadata.RelMetadataQuery
 import org.apache.calcite.sql.SqlKind
 import org.apache.calcite.util.ImmutableBitSet
@@ -38,9 +39,16 @@ class FlinkLogicalAggregate(
     child: RelNode,
     groupSet: ImmutableBitSet,
     groupSets: JList[ImmutableBitSet],
-    aggCalls: JList[AggregateCall])
+    aggCalls: JList[AggregateCall], location: String)
   extends Aggregate(cluster, traitSet, child, groupSet, groupSets, aggCalls)
   with FlinkLogicalRel {
+
+  var address = location
+  def setAddress(newLoc: String) ={
+    address = newLoc
+    super.setLocation(address)
+  }
+  def getAddress:String=address
 
   override def copy(
       traitSet: RelTraitSet,
@@ -48,7 +56,7 @@ class FlinkLogicalAggregate(
       groupSet: ImmutableBitSet,
       groupSets: JList[ImmutableBitSet],
       aggCalls: JList[AggregateCall]): Aggregate = {
-    new FlinkLogicalAggregate(cluster, traitSet, input, groupSet, groupSets, aggCalls)
+    new FlinkLogicalAggregate(cluster, traitSet, input, groupSet, groupSets, aggCalls, address)
   }
 
   override def computeSelfCost(planner: RelOptPlanner, metadata: RelMetadataQuery): RelOptCost = {
@@ -92,7 +100,7 @@ private class FlinkLogicalAggregateConverter
       newInput,
       agg.getGroupSet,
       agg.getGroupSets,
-      agg.getAggCallList)
+      agg.getAggCallList, agg.getLocation)
   }
 }
 

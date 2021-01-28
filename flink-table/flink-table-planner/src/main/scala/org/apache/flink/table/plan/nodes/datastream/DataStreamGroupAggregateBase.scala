@@ -19,9 +19,10 @@ package org.apache.flink.table.plan.nodes.datastream
 
 import java.lang.{Byte => JByte}
 
+import org.apache.calcite.rel.SingleRel
 import org.apache.calcite.plan.{RelOptCluster, RelTraitSet}
 import org.apache.calcite.rel.core.AggregateCall
-import org.apache.calcite.rel.{RelNode, RelWriter, SingleRel}
+import org.apache.calcite.rel.{RelNode, RelWriter}
 import org.apache.flink.api.java.functions.NullByteKeySelector
 import org.apache.flink.streaming.api.datastream.DataStream
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction

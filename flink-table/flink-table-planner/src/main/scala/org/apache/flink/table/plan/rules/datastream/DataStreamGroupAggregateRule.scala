@@ -18,10 +18,10 @@
 
 package org.apache.flink.table.plan.rules.datastream
 
+import org.apache.calcite.rel.logical.LogicalAggregate
 import org.apache.calcite.plan.{RelOptRule, RelOptRuleCall, RelTraitSet}
 import org.apache.calcite.rel.RelNode
 import org.apache.calcite.rel.convert.ConverterRule
-import org.apache.calcite.rel.logical.LogicalAggregate
 import org.apache.flink.table.api.TableException
 import org.apache.flink.table.plan.nodes.FlinkConventions
 import org.apache.flink.table.plan.nodes.datastream.DataStreamGroupAggregate

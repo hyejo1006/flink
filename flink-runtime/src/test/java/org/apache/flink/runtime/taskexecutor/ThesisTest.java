@@ -76,6 +76,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+
 public class ThesisTest extends TestLogger {
 
 	public static final HeartbeatServices HEARTBEAT_SERVICES = new HeartbeatServices(1000L, 1000L);
@@ -162,6 +163,7 @@ public class ThesisTest extends TestLogger {
 
 	@Test
 	public void assignPreferredLocation() throws Exception{
+
 
 		final JobID jobId = new JobID();
 		final String jobName = "Thesis test sample";
@@ -334,7 +336,6 @@ public class ThesisTest extends TestLogger {
 		final SimpleAckingTaskManagerGateway asiaTaskManagers = new SimpleAckingTaskManagerGateway();
 
 		final SimpleSlot[] slots = new SimpleSlot[12];
-		//final SimpleSlot[] asiaSlots = new SimpleSlot[6];
 
 		final TestingSlotOwner slotOwner = new TestingSlotOwner();
 
@@ -363,7 +364,6 @@ public class ThesisTest extends TestLogger {
 
 		eg.start(ComponentMainThreadExecutorServiceAdapter.forMainThread());
 		eg.scheduleForExecution();
-
 
 //		ExecutionJobVertex executionJobVertex1 = eg.getJobVertex(v1.getID());
 //		ExecutionJobVertex executionJobVertex2 = eg.getJobVertex(v2.getID());

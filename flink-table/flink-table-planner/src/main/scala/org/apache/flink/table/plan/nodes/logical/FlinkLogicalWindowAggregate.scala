@@ -20,10 +20,11 @@ package org.apache.flink.table.plan.nodes.logical
 
 import java.util
 
+import org.apache.calcite.rel.core.Aggregate
 import org.apache.calcite.plan._
 import org.apache.calcite.rel.`type`.RelDataType
 import org.apache.calcite.rel.convert.ConverterRule
-import org.apache.calcite.rel.core.{Aggregate, AggregateCall}
+import org.apache.calcite.rel.core.AggregateCall
 import org.apache.calcite.rel.metadata.RelMetadataQuery
 import org.apache.calcite.rel.{RelNode, RelShuttle, RelWriter}
 import org.apache.calcite.sql.SqlKind

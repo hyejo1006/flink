@@ -22,12 +22,14 @@ import com.google.common.collect.ImmutableList
 import org.apache.calcite.plan.RelOptPlanner.CannotPlanException
 import org.apache.calcite.plan.hep.{HepMatchOrder, HepPlanner, HepProgram, HepProgramBuilder}
 import org.apache.calcite.plan.{Context, Convention, RelOptPlanner, RelOptUtil, RelTraitSet}
-import org.apache.calcite.rel.RelNode
+import org.apache.calcite.rel.{AbstractRelNode, RelNode}
+import org.apache.calcite.rel.logical.LogicalProject
 import org.apache.calcite.tools.{Programs, RuleSet, RuleSets}
 import org.apache.flink.table.api.{TableConfig, TableException}
 import org.apache.flink.table.api.internal.TableEnvImpl
 import org.apache.flink.table.calcite.CalciteConfig
 import org.apache.flink.table.plan.nodes.FlinkConventions
+import org.apache.flink.table.plan.nodes.logical.FlinkLogicalDataSetScan
 import org.apache.flink.table.plan.rules.FlinkRuleSets
 import org.apache.flink.table.planner.PlanningConfigurationBuilder
 
@@ -221,6 +223,7 @@ abstract class Optimizer(
     targetTraits: RelTraitSet): RelNode = {
 
     val planner = new HepPlanner(hepProgram, planningConfigurationBuilder.getContext)
+    //input.getInput(0).asInstanceOf[AbstractRelNode].setLocation(input.asInstanceOf[AbstractRelNode].getLocation)
     planner.setRoot(input)
     if (input.getTraitSet != targetTraits) {
       planner.changeTraits(input, targetTraits.simplify)

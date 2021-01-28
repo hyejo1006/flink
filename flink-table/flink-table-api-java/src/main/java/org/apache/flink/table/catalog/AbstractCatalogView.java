@@ -42,12 +42,27 @@ public abstract class AbstractCatalogView implements CatalogView {
 	private final TableSchema schema;
 	private final Map<String, String> properties;
 	private final String comment;
+	private String location;
+	public String getLocation(){return location;}
+	public void setLocation(String newLoc){location=newLoc;}
 
 	public AbstractCatalogView(String originalQuery, String expandedQuery, TableSchema schema,
 			Map<String, String> properties, String comment) {
 		checkArgument(!StringUtils.isNullOrWhitespaceOnly(originalQuery), "originalQuery cannot be null or empty");
 		checkArgument(!StringUtils.isNullOrWhitespaceOnly(expandedQuery), "expandedQuery cannot be null or empty");
 
+		this.originalQuery = originalQuery;
+		this.expandedQuery = expandedQuery;
+		this.schema = checkNotNull(schema, "schema cannot be null");
+		this.properties = checkNotNull(properties, "properties cannot be null");
+		this.comment = comment;
+	}
+	public AbstractCatalogView(String location, String originalQuery, String expandedQuery, TableSchema schema,
+							   Map<String, String> properties, String comment) {
+		checkArgument(!StringUtils.isNullOrWhitespaceOnly(originalQuery), "originalQuery cannot be null or empty");
+		checkArgument(!StringUtils.isNullOrWhitespaceOnly(expandedQuery), "expandedQuery cannot be null or empty");
+
+		this.location = location;
 		this.originalQuery = originalQuery;
 		this.expandedQuery = expandedQuery;
 		this.schema = checkNotNull(schema, "schema cannot be null");

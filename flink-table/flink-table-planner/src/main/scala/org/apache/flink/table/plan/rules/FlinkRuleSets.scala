@@ -18,6 +18,7 @@
 
 package org.apache.flink.table.plan.rules
 
+import org.apache.calcite.rel.rules
 import org.apache.calcite.rel.core.RelFactories
 import org.apache.calcite.rel.rules._
 import org.apache.calcite.tools.{RuleSet, RuleSets}
@@ -113,7 +114,7 @@ object FlinkRuleSets {
     FilterCalcMergeRule.INSTANCE,
     ProjectCalcMergeRule.INSTANCE,
     FilterToCalcRule.INSTANCE,
-    ProjectToCalcRule.INSTANCE,
+    rules.ProjectToCalcRule.INSTANCE,
     CalcMergeRule.INSTANCE,
 
     // scan optimization
