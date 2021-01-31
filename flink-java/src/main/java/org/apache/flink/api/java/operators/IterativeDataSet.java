@@ -156,6 +156,8 @@ public class IterativeDataSet<T> extends SingleInputOperator<T, T, IterativeData
 
 	@Override
 	protected Operator<T> translateToDataFlow(Operator<T> input, String location) {
-		return null;
+		// All the translation magic happens when the iteration end is encountered.
+		throw new InvalidProgramException("A data set that is part of an iteration was used as a sink or action."
+			+ " Did you forget to close the iteration?");
 	}
 }

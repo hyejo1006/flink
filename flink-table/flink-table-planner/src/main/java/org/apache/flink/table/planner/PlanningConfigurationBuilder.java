@@ -82,10 +82,10 @@ public class PlanningConfigurationBuilder {
 	private CalciteSchema rootSchema;
 
 	public PlanningConfigurationBuilder(
-			TableConfig tableConfig,
-			FunctionCatalog functionCatalog,
-			CalciteSchema rootSchema,
-			ExpressionBridge<PlannerExpression> expressionBridge) {
+		TableConfig tableConfig,
+		FunctionCatalog functionCatalog,
+		CalciteSchema rootSchema,
+		ExpressionBridge<PlannerExpression> expressionBridge) {
 		this.tableConfig = tableConfig;
 		this.functionCatalog = functionCatalog;
 
@@ -175,9 +175,9 @@ public class PlanningConfigurationBuilder {
 	}
 
 	private CatalogReader createCatalogReader(
-			boolean lenientCaseSensitivity,
-			String currentCatalog,
-			String currentDatabase) {
+		boolean lenientCaseSensitivity,
+		String currentCatalog,
+		String currentDatabase) {
 		SqlParser.Config sqlParserConfig = getSqlParserConfig();
 		final boolean caseSensitive;
 		if (lenientCaseSensitivity) {
@@ -226,8 +226,8 @@ public class PlanningConfigurationBuilder {
 	 * Returns the {@link SqlToRelConverter} config.
 	 */
 	private SqlToRelConverter.Config getSqlToRelConverterConfig(
-			CalciteConfig calciteConfig,
-			ExpressionBridge<PlannerExpression> expressionBridge) {
+		CalciteConfig calciteConfig,
+		ExpressionBridge<PlannerExpression> expressionBridge) {
 		return JavaScalaConversionUtil.toJava(calciteConfig.sqlToRelConverterConfig()).orElseGet(
 			() -> SqlToRelConverter.configBuilder()
 				.withTrimUnusedFields(false)

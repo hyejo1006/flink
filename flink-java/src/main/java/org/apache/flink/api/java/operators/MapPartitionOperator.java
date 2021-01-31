@@ -76,6 +76,20 @@ public class MapPartitionOperator<IN, OUT> extends SingleInputUdfOperator<IN, OU
 
 	@Override
 	protected Operator<OUT> translateToDataFlow(Operator<IN> input, String location) {
-		return null;
+		String name = getName() != null ? getName() : "MapPartition at " + defaultName;
+		// create operator
+		MapPartitionOperatorBase<IN, OUT, MapPartitionFunction<IN, OUT>> po = new MapPartitionOperatorBase<IN, OUT, MapPartitionFunction<IN, OUT>>(function, new UnaryOperatorInformation<IN, OUT>(getInputType(), getResultType()), name);
+		// set input
+		po.setInput(input);
+		// set parallelism
+		if (this.getParallelism() > 0) {
+			// use specified parallelism
+			po.setParallelism(this.getParallelism());
+		} else {
+			// if no parallelism has been specified, use parallelism of input operator to enable chaining
+			po.setParallelism(input.getParallelism());
+		}
+
+		return po;
 	}
 }

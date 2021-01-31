@@ -184,7 +184,48 @@ public class PartitionOperator<T> extends SingleInputOperator<T, T, PartitionOpe
 
 	@Override
 	protected Operator<T> translateToDataFlow(Operator<T> input, String location) {
-		return null;
+		String name = "Partition at " + partitionLocationName;
+
+		// distinguish between partition types
+		if (pMethod == PartitionMethod.REBALANCE) {
+
+			UnaryOperatorInformation<T, T> operatorInfo = new UnaryOperatorInformation<>(getType(), getType());
+			PartitionOperatorBase<T> rebalancedInput = new PartitionOperatorBase<>(operatorInfo, pMethod, name);
+			rebalancedInput.setInput(input);
+			rebalancedInput.setParallelism(getParallelism());
+
+			return rebalancedInput;
+		}
+		else if (pMethod == PartitionMethod.HASH || pMethod == PartitionMethod.CUSTOM || pMethod == PartitionMethod.RANGE) {
+
+			if (pKeys instanceof Keys.ExpressionKeys) {
+
+				int[] logicalKeyPositions = pKeys.computeLogicalKeyPositions();
+				UnaryOperatorInformation<T, T> operatorInfo = new UnaryOperatorInformation<>(getType(), getType());
+				PartitionOperatorBase<T> partitionedInput = new PartitionOperatorBase<>(operatorInfo, pMethod, logicalKeyPositions, name);
+				partitionedInput.setInput(input);
+				partitionedInput.setParallelism(getParallelism());
+				partitionedInput.setDistribution(distribution);
+				partitionedInput.setCustomPartitioner(customPartitioner);
+				partitionedInput.setOrdering(computeOrdering(pKeys, orders));
+
+				return partitionedInput;
+			}
+			else if (pKeys instanceof Keys.SelectorFunctionKeys) {
+
+				@SuppressWarnings("unchecked")
+				Keys.SelectorFunctionKeys<T, ?> selectorKeys = (Keys.SelectorFunctionKeys<T, ?>) pKeys;
+				return translateSelectorFunctionPartitioner(selectorKeys, pMethod, name, input, getParallelism(),
+					customPartitioner, orders);
+			}
+			else {
+				throw new UnsupportedOperationException("Unrecognized key type.");
+			}
+
+		}
+		else {
+			throw new UnsupportedOperationException("Unsupported partitioning method: " + pMethod.name());
+		}
 	}
 
 	private static <T> Ordering computeOrdering(Keys<T> pKeys, Order[] orders) {

@@ -63,6 +63,10 @@ public abstract class SingleInputOperator<IN, OUT, FT extends Function> extends 
 		super(stub, operatorInfo, name);
 		this.keyFields = keyPositions;
 	}
+	protected SingleInputOperator(UserCodeWrapper<FT> stub, UnaryOperatorInformation<IN, OUT> operatorInfo, int[] keyPositions, String name, String location) {
+		super(stub, operatorInfo, name, location);
+		this.keyFields = keyPositions;
+	}
 	
 	/**
 	 * Creates a new abstract single-input operator with the given name wrapping the given user function.

@@ -197,7 +197,7 @@ public class GroupCombineOperator<IN, OUT> extends SingleInputUdfOperator<IN, OU
 			// non grouped reduce
 			UnaryOperatorInformation<IN, OUT> operatorInfo = new UnaryOperatorInformation<>(getInputType(), getResultType());
 			GroupCombineOperatorBase<IN, OUT, GroupCombineFunction<IN, OUT>> po =
-				new GroupCombineOperatorBase<>(function, operatorInfo, new int[0], name);
+				new GroupCombineOperatorBase<>(function, operatorInfo, new int[0], name, location);
 
 			po.setInput(input);
 			// the parallelism for a non grouped reduce can only be 1

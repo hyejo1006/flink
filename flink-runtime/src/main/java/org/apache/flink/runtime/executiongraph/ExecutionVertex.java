@@ -49,16 +49,7 @@ import org.slf4j.Logger;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.IntStream;
 
@@ -101,6 +92,9 @@ public class ExecutionVertex implements AccessExecutionVertex, Archiveable<Archi
 	private final ArrayList<InputSplit> inputSplits;
 
 	private String location = "executionvertexLocation";
+
+	public HashMap<String, String[]> listMap;
+	public ArrayList<String> vertexLocations = new ArrayList<>();
 
 	// --------------------------------------------------------------------------------------------
 
@@ -186,6 +180,18 @@ public class ExecutionVertex implements AccessExecutionVertex, Archiveable<Archi
 
 		this.timeout = timeout;
 		this.inputSplits = new ArrayList<>();
+		listMap.put("Location1", new String[]{"ibm-power-1", "ibm-power-2"});
+		listMap.put("Location2", new String[]{"ibm-power-3", "ibm-power-4"});
+		listMap.put("Location3", new String[]{"ibm-power-5"});
+		listMap.put("Location4", new String[]{"ibm-power-6"});
+		listMap.put("Location5", new String[]{"ibm-power-7", "ibm-power-8", "ibm-power-9"});
+
+
+		vertexLocations.add("Location1");
+		vertexLocations.add("Location2");
+		vertexLocations.add("Location3");
+		vertexLocations.add("Location4");
+		vertexLocations.add("Location5");
 	}
 
 
@@ -512,6 +518,14 @@ public class ExecutionVertex implements AccessExecutionVertex, Archiveable<Archi
 	public Collection<CompletableFuture<TaskManagerLocation>> getPreferredLocationsBasedOnState() {
 		TaskManagerLocation priorLocation;
 		if (currentExecution.getTaskRestore() != null && (priorLocation = getLatestPriorLocation()) != null) {
+			if(vertexLocations.contains(this.getLocation()))
+			{
+				for(String host : listMap.get(this.location)){
+					if(host.equals(priorLocation.getHostname()))
+						return Collections.singleton(CompletableFuture.completedFuture(priorLocation));
+				}
+				return null;
+			}
 			return Collections.singleton(CompletableFuture.completedFuture(priorLocation));
 		}
 		else {
@@ -530,6 +544,7 @@ public class ExecutionVertex implements AccessExecutionVertex, Archiveable<Archi
 	 */
 	public Collection<CompletableFuture<TaskManagerLocation>> getPreferredLocationsBasedOnInputs() {
 		// otherwise, base the preferred locations on the input connections
+		String location=this.getLocation();
 		if (inputEdges == null) {
 			return Collections.emptySet();
 		}
@@ -537,31 +552,48 @@ public class ExecutionVertex implements AccessExecutionVertex, Archiveable<Archi
 			Set<CompletableFuture<TaskManagerLocation>> locations = new HashSet<>(getTotalNumberOfParallelSubtasks());
 			Set<CompletableFuture<TaskManagerLocation>> inputLocations = new HashSet<>(getTotalNumberOfParallelSubtasks());
 
+
 			// go over all inputs
 			for (int i = 0; i < inputEdges.length; i++) {
 				inputLocations.clear();
 				ExecutionEdge[] sources = inputEdges[i];
 				if (sources != null) {
 					// go over all input sources
-					for (int k = 0; k < sources.length; k++) {
-						// look-up assigned slot of input source
-						CompletableFuture<TaskManagerLocation> locationFuture = sources[k].getSource().getProducer().getCurrentTaskManagerLocationFuture();
-						// add input location
-						inputLocations.add(locationFuture);
-
-//						//System.out.println("\nCompletableFuture of sources["+k+"]: "+locationFuture.toString());
-//						TaskManagerLocation tmLoc = locationFuture.getNow(null);
-//						//System.out.println("TaskManagerLocation: "+tmLoc.getLocation());
-//						if(!(tmLoc ==null) && this.location==tmLoc.getLocation())
-//							inputLocations.add(locationFuture);
-						// inputs which have too many distinct sources are not considered
-						if (inputLocations.size() > MAX_DISTINCT_LOCATIONS_TO_CONSIDER) {
-							inputLocations.clear();
-//							if(!(tmLoc ==null) && this.location==tmLoc.getLocation())
-//								inputLocations.add(locationFuture);
-							break;
+					if(vertexLocations.contains(location)){
+						for (int k = 0; k < sources.length; k++) {
+							// look-up assigned slot of input source
+							CompletableFuture<TaskManagerLocation> locationFuture = sources[k].getSource().getProducer().getCurrentTaskManagerLocationFuture();
+							// add input location
+							TaskManagerLocation temp=locationFuture.getNow(null);
+							if(temp!=null) {
+								String[] tmlist = listMap.get(location);
+								for (String hostname : tmlist) {
+									if (hostname.equals(temp.getHostname()))
+										inputLocations.add(locationFuture);
+								}
+							}
+							if (inputLocations.size() > MAX_DISTINCT_LOCATIONS_TO_CONSIDER) {
+								inputLocations.clear();
+								break;
+							}
 						}
 					}
+					else {
+						for (int k = 0; k < sources.length; k++) {
+							// look-up assigned slot of input source
+							CompletableFuture<TaskManagerLocation> locationFuture = sources[k].getSource().getProducer().getCurrentTaskManagerLocationFuture();
+							// add input location
+							inputLocations.add(locationFuture);
+
+							if (inputLocations.size() > MAX_DISTINCT_LOCATIONS_TO_CONSIDER) {
+								inputLocations.clear();
+								break;
+							}
+						}
+					}
+
+
+
 				}
 				// keep the locations of the input with the least preferred locations
 				if (locations.isEmpty() || // nothing assigned yet

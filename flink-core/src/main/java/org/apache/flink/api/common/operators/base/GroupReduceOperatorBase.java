@@ -69,6 +69,10 @@ public class GroupReduceOperatorBase<IN, OUT, FT extends GroupReduceFunction<IN,
 	public GroupReduceOperatorBase(FT udf, UnaryOperatorInformation<IN, OUT> operatorInfo, int[] keyPositions, String name) {
 		super(new UserCodeObjectWrapper<FT>(udf), operatorInfo, keyPositions, name);
 	}
+
+	public GroupReduceOperatorBase(FT udf, UnaryOperatorInformation<IN, OUT> operatorInfo, int[] keyPositions, String name, String location) {
+		super(new UserCodeObjectWrapper<FT>(udf), operatorInfo, keyPositions, name, location);
+	}
 	
 	public GroupReduceOperatorBase(Class<? extends FT> udf, UnaryOperatorInformation<IN, OUT> operatorInfo, int[] keyPositions, String name) {
 		super(new UserCodeClassWrapper<FT>(udf), operatorInfo, keyPositions, name);

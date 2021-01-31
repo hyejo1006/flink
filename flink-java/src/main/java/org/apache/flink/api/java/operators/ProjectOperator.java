@@ -94,8 +94,18 @@ public class ProjectOperator<IN, OUT extends Tuple>
 	}
 
 	@Override
-	protected Operator<OUT> translateToDataFlow(Operator<IN> input, String location) {
-		return null;
+	protected org.apache.flink.api.common.operators.base.MapOperatorBase<IN, OUT, MapFunction<IN, OUT>> translateToDataFlow(Operator<IN> input, String location) {
+
+		String name = getName() != null ? getName() : "Projection " + Arrays.toString(fields);
+		// create operator
+		PlanProjectOperator<IN, OUT> ppo = new PlanProjectOperator<IN, OUT>(fields, name, getInputType(), getResultType(), context.getConfig());
+		// set input
+		ppo.setInput(input);
+		// set parallelism
+		ppo.setParallelism(this.getParallelism());
+		ppo.setSemanticProperties(SemanticPropUtil.createProjectionPropertiesSingle(fields, (CompositeType<?>) getInputType()));
+
+		return ppo;
 	}
 
 	/**

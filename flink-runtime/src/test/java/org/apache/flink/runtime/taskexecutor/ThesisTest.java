@@ -264,6 +264,11 @@ public class ThesisTest extends TestLogger {
 		one.setLocation("Asia");
 		TaskManagerLocation two = new TaskManagerLocation(resourceID3, address2, 10871);
 		two.setLocation("Europe");
+//		System.out.println(one.getResourceID());
+//		System.out.println(one.address());
+//		System.out.println(one.addressString());
+//		System.out.println(one.getFQDNHostname());
+//		System.out.println(one.getHostname());
 
 		SlotRequestId slotRequestId = new SlotRequestId();
 		constraint1.setSlotRequestId(slotRequestId);

@@ -206,7 +206,44 @@ public class SortPartitionOperator<T> extends SingleInputOperator<T, T, SortPart
 
 	@Override
 	protected Operator<T> translateToDataFlow(Operator<T> input, String location) {
-		return null;
+		String name = "Sort at " + sortLocationName;
+
+		if (useKeySelector) {
+			return translateToDataFlowWithKeyExtractor(input, (Keys.SelectorFunctionKeys<T, ?>) keys.get(0), orders.get(0), name);
+		}
+
+		// flatten sort key positions
+		List<Integer> allKeyPositions = new ArrayList<>();
+		List<Order> allOrders = new ArrayList<>();
+		for (int i = 0, length = keys.size(); i < length; i++) {
+			int[] sortKeyPositions = keys.get(i).computeLogicalKeyPositions();
+			Order order = orders.get(i);
+
+			for (int sortKeyPosition : sortKeyPositions) {
+				allKeyPositions.add(sortKeyPosition);
+				allOrders.add(order);
+			}
+		}
+
+		Ordering partitionOrdering = new Ordering();
+		for (int i = 0, length = allKeyPositions.size(); i < length; i++) {
+			partitionOrdering.appendOrdering(allKeyPositions.get(i), null, allOrders.get(i));
+		}
+
+		// distinguish between partition types
+		UnaryOperatorInformation<T, T> operatorInfo = new UnaryOperatorInformation<>(getType(), getType());
+		SortPartitionOperatorBase<T> noop = new SortPartitionOperatorBase<>(operatorInfo, partitionOrdering, name);
+		noop.setInput(input);
+		if (this.getParallelism() < 0) {
+			// use parallelism of input if not explicitly specified
+			noop.setParallelism(input.getParallelism());
+		} else {
+			// use explicitly specified parallelism
+			noop.setParallelism(this.getParallelism());
+		}
+
+		return noop;
+
 	}
 
 	private <K> org.apache.flink.api.common.operators.SingleInputOperator<?, T, ?> translateToDataFlowWithKeyExtractor(

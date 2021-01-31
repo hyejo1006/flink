@@ -60,6 +60,9 @@ public class GroupCombineOperatorBase<IN, OUT, FT extends GroupCombineFunction<I
 	public GroupCombineOperatorBase(FT udf, UnaryOperatorInformation<IN, OUT> operatorInfo, int[] keyPositions, String name) {
 		super(new UserCodeObjectWrapper<FT>(udf), operatorInfo, keyPositions, name);
 	}
+	public GroupCombineOperatorBase(FT udf, UnaryOperatorInformation<IN, OUT> operatorInfo, int[] keyPositions, String name, String location) {
+		super(new UserCodeObjectWrapper<FT>(udf), operatorInfo, keyPositions, name, location);
+	}
 
 	// --------------------------------------------------------------------------------------------
 

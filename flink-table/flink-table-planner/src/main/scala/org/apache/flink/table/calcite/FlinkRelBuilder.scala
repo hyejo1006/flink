@@ -77,16 +77,16 @@ class FlinkRelBuilder(
 
   var scanFactory = Util.first(context.unwrap(classOf[RelFactories.TableScanFactory]), RelFactories.DEFAULT_TABLE_SCAN_FACTORY)
 
-  def scan(tableNames: Iterable[String], location: String): RelBuilder = {
-    val names: util.List[String] = ImmutableList.copyOf(tableNames)
-    val relOptTable: RelOptTable = relOptSchema.getTableForMember(names)
-    if (relOptTable == null) throw RESOURCE.tableNotFound(String.join(".", names)).ex
-    val scan: RelNode = scanFactory.createScan(cluster, relOptTable)
-    scan.asInstanceOf[LogicalTableScan].setLocation(location);
-    push(scan)
-    rename(relOptTable.getRowType.getFieldNames)
-    this
-  }
+//  def scan(tableNames: Iterable[String], location: String): RelBuilder = {
+//    val names: util.List[String] = ImmutableList.copyOf(tableNames)
+//    val relOptTable: RelOptTable = relOptSchema.getTableForMember(names)
+//    if (relOptTable == null) throw RESOURCE.tableNotFound(String.join(".", names)).ex
+//    val scan: RelNode = scanFactory.createScan(cluster, relOptTable)
+//    scan.asInstanceOf[LogicalTableScan].setLocation(location);
+//    push(scan)
+//    rename(relOptTable.getRowType.getFieldNames)
+//    this
+//  }
 
 
 

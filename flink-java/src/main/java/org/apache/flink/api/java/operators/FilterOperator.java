@@ -72,7 +72,23 @@ public class FilterOperator<T> extends SingleInputUdfOperator<T, T, FilterOperat
 	}
 
 	@Override
-	protected Operator<T> translateToDataFlow(Operator<T> input, String location) {
-		return null;
+	protected org.apache.flink.api.common.operators.base.FilterOperatorBase<T, FlatMapFunction<T, T>> translateToDataFlow(Operator<T> input, String location) {
+		String name = getName() != null ? getName() : "Filter at " + defaultName;
+
+		// create operator
+		PlanFilterOperator<T> po = new PlanFilterOperator<T>(function, name, getInputType());
+		po.setInput(input);
+
+		// set parallelism
+		if (getParallelism() > 0) {
+			// use specified parallelism
+			po.setParallelism(getParallelism());
+		} else {
+			// if no parallelism has been specified, use parallelism of input operator to enable chaining
+			po.setParallelism(input.getParallelism());
+		}
+
+		return po;
+
 	}
 }

@@ -159,7 +159,53 @@ public class ReduceOperator<IN> extends SingleInputUdfOperator<IN, IN, ReduceOpe
 
 	@Override
 	protected Operator<IN> translateToDataFlow(Operator<IN> input, String location) {
-		return null;
+		String name = getName() != null ? getName() : "Reduce at " + defaultName;
+
+		// distinguish between grouped reduce and non-grouped reduce
+		if (grouper == null) {
+			// non grouped reduce
+			UnaryOperatorInformation<IN, IN> operatorInfo = new UnaryOperatorInformation<>(getInputType(), getInputType());
+			ReduceOperatorBase<IN, ReduceFunction<IN>> po =
+				new ReduceOperatorBase<>(function, operatorInfo, new int[0], name);
+
+			po.setInput(input);
+			// the parallelism for a non grouped reduce can only be 1
+			po.setParallelism(1);
+
+			return po;
+		}
+
+		if (grouper.getKeys() instanceof SelectorFunctionKeys) {
+
+			// reduce with key selector function
+			@SuppressWarnings("unchecked")
+			SelectorFunctionKeys<IN, ?> selectorKeys = (SelectorFunctionKeys<IN, ?>) grouper.getKeys();
+
+			org.apache.flink.api.common.operators.SingleInputOperator<?, IN, ?> po =
+				translateSelectorFunctionReducer(selectorKeys, function, getInputType(), name, input, getParallelism(), hint);
+			((PlanUnwrappingReduceOperator<?, ?>) po.getInput()).setCustomPartitioner(grouper.getCustomPartitioner());
+
+			return po;
+		}
+		else if (grouper.getKeys() instanceof Keys.ExpressionKeys) {
+
+			// reduce with field positions
+			int[] logicalKeyPositions = grouper.getKeys().computeLogicalKeyPositions();
+			UnaryOperatorInformation<IN, IN> operatorInfo = new UnaryOperatorInformation<>(getInputType(), getInputType());
+			ReduceOperatorBase<IN, ReduceFunction<IN>> po =
+				new ReduceOperatorBase<>(function, operatorInfo, logicalKeyPositions, name);
+
+			po.setCustomPartitioner(grouper.getCustomPartitioner());
+
+			po.setInput(input);
+			po.setParallelism(getParallelism());
+			po.setCombineHint(hint);
+
+			return po;
+		}
+		else {
+			throw new UnsupportedOperationException("Unrecognized key type.");
+		}
 	}
 
 	/**

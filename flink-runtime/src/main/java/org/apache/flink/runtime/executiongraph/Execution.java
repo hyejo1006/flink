@@ -343,11 +343,6 @@ public class Execution implements AccessExecution, Archiveable<ArchivedExecution
 		// returns non-null only when a location is already assigned
 		final LogicalSlot currentAssignedResource = assignedResource;
 
-		//hyejo
-		if(currentAssignedResource != null)
-			currentAssignedResource.getTaskManagerLocation().setLocation(vertex.getLocation());
-		//hyejo
-
 
 		return currentAssignedResource != null ? currentAssignedResource.getTaskManagerLocation() : null;
 	}
@@ -532,13 +527,7 @@ public class Execution implements AccessExecution, Archiveable<ArchivedExecution
 
 		SlotSharingGroup sharingGroup = vertex.getJobVertex().getSlotSharingGroup();
 		CoLocationConstraint locationConstraint = vertex.getLocationConstraint();
-//
-//		//hyejo
-//		if(locationConstraint != null && locationConstraint.getLocation().getLocation() != vertex.getLocation()) {
-//			locationConstraint = null;
-//			sharingGroup = null;
-//		}
-//		//
+
 
 		// sanity check
 		if (locationConstraint != null && sharingGroup == null) {
@@ -1432,9 +1421,6 @@ public class Execution implements AccessExecution, Archiveable<ArchivedExecution
 		if (slot != null) {
 			final TaskManagerGateway taskManagerGateway = slot.getTaskManagerGateway();
 			final TaskManagerLocation taskManagerLocation = slot.getTaskManagerLocation();
-			//hyejo
-			taskManagerLocation.setLocation(vertex.getLocation());
-			//
 
 			CompletableFuture<Acknowledge> updatePartitionsResultFuture = taskManagerGateway.updatePartitions(attemptId, partitionInfos, rpcTimeout);
 

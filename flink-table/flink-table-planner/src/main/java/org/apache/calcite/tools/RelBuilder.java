@@ -54,6 +54,7 @@ import org.apache.calcite.rel.core.Values;
 import org.apache.calcite.rel.logical.LogicalFilter;
 import org.apache.calcite.rel.logical.LogicalJoin;
 import org.apache.calcite.rel.logical.LogicalProject;
+import org.apache.calcite.rel.logical.LogicalTableScan;
 import org.apache.calcite.rel.metadata.RelColumnMapping;
 import org.apache.calcite.rel.metadata.RelMetadataQuery;
 import org.apache.calcite.rel.type.RelDataType;
@@ -1053,6 +1054,19 @@ public class RelBuilder {
     rename(relOptTable.getRowType().getFieldNames());
     return this;
   }
+
+	public RelBuilder scan(Iterable<String> tableNames, String location) {
+		final List<String> names = ImmutableList.copyOf(tableNames);
+		final RelOptTable relOptTable = relOptSchema.getTableForMember(names);
+		if (relOptTable == null) {
+			throw RESOURCE.tableNotFound(String.join(".", names)).ex();
+		}
+		final RelNode scan = scanFactory.createScan(cluster, relOptTable);
+		((LogicalTableScan)scan).setLocation(location);
+		push(scan);
+		rename(relOptTable.getRowType().getFieldNames());
+		return this;
+	}
 
   /** Creates a {@link TableScan} of the table
    * with a given name.

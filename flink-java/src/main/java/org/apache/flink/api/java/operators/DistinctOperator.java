@@ -110,7 +110,47 @@ public class DistinctOperator<T> extends SingleInputOperator<T, T, DistinctOpera
 
 	@Override
 	protected Operator<T> translateToDataFlow(Operator<T> input, String location) {
-		return null;
+		final ReduceFunction<T> function = new DistinctFunction<>();
+
+		String name = getName() != null ? getName() : "Distinct at " + distinctLocationName;
+
+		if (keys instanceof Keys.ExpressionKeys) {
+
+			int[] logicalKeyPositions = keys.computeLogicalKeyPositions();
+			UnaryOperatorInformation<T, T> operatorInfo = new UnaryOperatorInformation<>(getInputType(), getResultType());
+			ReduceOperatorBase<T, ReduceFunction<T>> po =
+				new ReduceOperatorBase<>(function, operatorInfo, logicalKeyPositions, name);
+
+			po.setCombineHint(hint);
+			po.setInput(input);
+			po.setParallelism(getParallelism());
+
+			// make sure that distinct preserves the partitioning for the fields on which they operate
+			if (getType().isTupleType()) {
+				SingleInputSemanticProperties sProps = new SingleInputSemanticProperties();
+
+				for (int field : keys.computeLogicalKeyPositions()) {
+					sProps.addForwardedField(field, field);
+				}
+
+				po.setSemanticProperties(sProps);
+			}
+
+			return po;
+		}
+		else if (keys instanceof SelectorFunctionKeys) {
+
+			@SuppressWarnings("unchecked")
+			SelectorFunctionKeys<T, ?> selectorKeys = (SelectorFunctionKeys<T, ?>) keys;
+
+			org.apache.flink.api.common.operators.SingleInputOperator<?, T, ?> po =
+				translateSelectorFunctionDistinct(selectorKeys, function, getResultType(), name, input, parallelism, hint);
+
+			return po;
+		}
+		else {
+			throw new UnsupportedOperationException("Unrecognized key type.");
+		}
 	}
 
 	/**
