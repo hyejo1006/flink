@@ -291,8 +291,90 @@ public class GroupReduceOperator<IN, OUT> extends SingleInputUdfOperator<IN, OUT
 	}
 
 	@Override
-	protected Operator<OUT> translateToDataFlow(Operator<IN> input, String location) {
-		return null;
+	@SuppressWarnings("unchecked")
+	protected GroupReduceOperatorBase<?, OUT, ?> translateToDataFlow(Operator<IN> input, String location) {
+
+		String name = getName() != null ? getName() : "GroupReduce at " + defaultName;
+
+		// wrap CombineFunction in GroupCombineFunction if combinable
+		if (combinable && function instanceof CombineFunction<?, ?>) {
+			this.function = function instanceof RichGroupReduceFunction<?, ?> ?
+				new RichCombineToGroupCombineWrapper((RichGroupReduceFunction<?, ?>) function) :
+				new CombineToGroupCombineWrapper((CombineFunction<?, ?>) function);
+		}
+
+		// distinguish between grouped reduce and non-grouped reduce
+		if (grouper == null) {
+			// non grouped reduce
+			UnaryOperatorInformation<IN, OUT> operatorInfo = new UnaryOperatorInformation<>(getInputType(), getResultType());
+			GroupReduceOperatorBase<IN, OUT, GroupReduceFunction<IN, OUT>> po =
+				new GroupReduceOperatorBase<>(function, operatorInfo, new int[0], name, location);
+
+			po.setCombinable(combinable);
+			po.setInput(input);
+			// the parallelism for a non grouped reduce can only be 1
+			po.setParallelism(1);
+			return po;
+		}
+
+		if (grouper.getKeys() instanceof SelectorFunctionKeys) {
+
+			@SuppressWarnings("unchecked")
+			SelectorFunctionKeys<IN, ?> selectorKeys = (SelectorFunctionKeys<IN, ?>) grouper.getKeys();
+
+			if (grouper instanceof SortedGrouping) {
+				SortedGrouping<IN> sortedGrouping = (SortedGrouping<IN>) grouper;
+				SelectorFunctionKeys<IN, ?> sortKeys = sortedGrouping.getSortSelectionFunctionKey();
+				Ordering groupOrder = sortedGrouping.getGroupOrdering();
+
+				PlanUnwrappingSortedReduceGroupOperator<IN, OUT, ?, ?> po =
+					translateSelectorFunctionSortedReducer(
+						selectorKeys, sortKeys, groupOrder, function, getResultType(), name, input, isCombinable()
+					);
+
+				po.setParallelism(this.getParallelism());
+				po.setCustomPartitioner(grouper.getCustomPartitioner());
+				return po;
+			} else {
+				PlanUnwrappingReduceGroupOperator<IN, OUT, ?> po = translateSelectorFunctionReducer(
+					selectorKeys, function, getResultType(), name, input, isCombinable());
+
+				po.setParallelism(this.getParallelism());
+				po.setCustomPartitioner(grouper.getCustomPartitioner());
+				return po;
+			}
+		}
+		else if (grouper.getKeys() instanceof ExpressionKeys) {
+
+			int[] logicalKeyPositions = grouper.getKeys().computeLogicalKeyPositions();
+			UnaryOperatorInformation<IN, OUT> operatorInfo = new UnaryOperatorInformation<>(getInputType(), getResultType());
+			GroupReduceOperatorBase<IN, OUT, GroupReduceFunction<IN, OUT>> po =
+				new GroupReduceOperatorBase<>(function, operatorInfo, logicalKeyPositions, name);
+
+			po.setCombinable(combinable);
+			po.setInput(input);
+			po.setParallelism(getParallelism());
+			po.setCustomPartitioner(grouper.getCustomPartitioner());
+
+			// set group order
+			if (grouper instanceof SortedGrouping) {
+				SortedGrouping<IN> sortedGrouper = (SortedGrouping<IN>) grouper;
+
+				int[] sortKeyPositions = sortedGrouper.getGroupSortKeyPositions();
+				Order[] sortOrders = sortedGrouper.getGroupSortOrders();
+
+				Ordering o = new Ordering();
+				for (int i = 0; i < sortKeyPositions.length; i++) {
+					o.appendOrdering(sortKeyPositions[i], null, sortOrders[i]);
+				}
+				po.setGroupOrder(o);
+			}
+
+			return po;
+		}
+		else {
+			throw new UnsupportedOperationException("Unrecognized key type.");
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------

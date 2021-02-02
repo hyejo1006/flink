@@ -77,7 +77,7 @@ class ExplainTest
     val table4 = tEnv.fromDataSet("table4", table2)
     val table5 = tEnv.fromDataSet("table5", table3)
     val table6 = tEnv.fromDataSet("table6", table4)
-    //val result4 = tEnv.explain(table1).replaceAll("\\r\\n", "\n")
+    //val result4 = tEnv.explain(table3).replaceAll("\\r\\n", "\n")
 
     val table = table5.join("jointest",table6).where("b = d").select("selecttest","a, c")
 

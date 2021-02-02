@@ -93,7 +93,7 @@ public class ExecutionVertex implements AccessExecutionVertex, Archiveable<Archi
 
 	private String location = "executionvertexLocation";
 
-	public HashMap<String, String[]> listMap;
+	public HashMap<String, String[]> listMap = new HashMap<>();
 	public ArrayList<String> vertexLocations = new ArrayList<>();
 
 	// --------------------------------------------------------------------------------------------

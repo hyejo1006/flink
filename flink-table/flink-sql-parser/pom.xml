@@ -35,7 +35,7 @@ under the License.
 	<properties>
 		<!-- override parent pom -->
 		<test.excludedGroups/>
-		<calcite.version>1.20.0</calcite.version>
+		<calcite.version>1.20.1</calcite.version>
 	</properties>
 
 	<dependencies>
@@ -156,6 +156,22 @@ under the License.
 			</exclusions>
 			<scope>test</scope>
 			<type>test-jar</type>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.calcite.avatica</groupId>
+			<artifactId>avatica-core</artifactId>
+			<version>1.16.0</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>19.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.jayway.jsonpath</groupId>
+			<artifactId>json-path</artifactId>
+			<version>2.4.0</version>
 		</dependency>
 	</dependencies>
 
